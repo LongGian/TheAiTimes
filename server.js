@@ -1,23 +1,18 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
 const app = express();
 
-// app.js
-const postgres = require('postgres');
-require('dotenv').config();
+// DB Connection
+const { Pool } = require('pg');
 
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
-const URL = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?options=project%3D${ENDPOINT_ID}`;
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'the-ai-times',
+  password: 'password',
+  port: 5432,
+});
 
-const sql = postgres(URL, { ssl: 'require' });
-
-async function getPgVersion() {
-  const result = await sql`select version()`;
-  console.log(result);
-}
-
-getPgVersion();
-
+// ### ### ###
 app.use(
   express.static("public", {
     setHeaders: function (res, path, stat) {
@@ -40,6 +35,22 @@ app.get('/newsApp.js', function(req, res) {
 app.get('/weatherApp.js', function(req, res) {
   res.type('application/javascript');
   res.sendFile(__dirname + '/weatherApp.js');
+});
+
+app.get('/client-archive.js', function(req, res) {
+  res.type('application/javascript');
+  res.sendFile(__dirname + '/client-archive.js');
+});
+
+app.get('/archive', (req, res) => {
+  pool.query('SELECT * FROM news', (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.json(result.rows);
+    }
+  });
 });
 
 const PORT = 51555;

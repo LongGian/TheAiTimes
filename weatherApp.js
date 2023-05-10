@@ -14,7 +14,7 @@ const weather = Vue.createApp({
           const lon = position.coords.longitude;
 
           // API call
-          const apiKey = "636825d70920404ca05101735230705 ";
+          const apiKey = "636825d70920404ca05101735230705";
           const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&aqi=no`;
 
           const response = await fetch(url);
@@ -26,7 +26,7 @@ const weather = Vue.createApp({
           const location = data.location.name;
 
           this.weatherDescription = weatherDescription;
-          this.temperature = temperature;
+          this.temperature = temperature + '°C';
           this.location = location + ',';
         });
     }
