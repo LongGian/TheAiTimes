@@ -18,7 +18,7 @@ $(document).ready(() => {
                         >
                             <div class="position-relative">
                               <img
-                                src="https://via.placeholder.com/400x250"
+                                src=${news.imageurl}
                                 class="card-img"
                                 alt="Immagine della notizia"
                               />
@@ -29,7 +29,7 @@ $(document).ready(() => {
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title text-truncate">${news.title}</h5>
-                                <small>${news.title}</small>
+                                <small class="truncate">${news.content}</small>
                             </div>
                         </div>
                     </div>
