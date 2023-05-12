@@ -28,8 +28,8 @@ $(document).ready(() => {
                               >
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title text-truncate">${news.title}</h5>
-                                <small class="truncate">${news.content}</small>
+                                <h5 class="card-title">${news.title.replace('"', '')}</h5>
+                                <small class="">${news.date.split('T')[0]}</small>
                             </div>
                         </div>
                     </div>
