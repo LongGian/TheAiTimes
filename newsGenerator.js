@@ -4,18 +4,18 @@ require("dotenv").config();
 
 // DB Configuration
 const pgConfig = {
-  user: "dxeyhugp",
-  host: "horton.db.elephantsql.com",
-  database: "dxeyhugp",
-  password: "vdjLLvMZ83wlx6ilmDs20fx0DplSq_Wg",
-  port: 5432,
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
 };
 
 // OpenAI API Calls
 const temperature = 1;
-const model = "text-davinci-001";
-const apiKey = "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"; //process.env.OPENAI_API_KEY;
-console.log("\nCHIAVE: " + apiKey);
+const model = "text-davinci-003";
+const apiKey = process.env.OPENAI_API_KEY;
+console.log(process.env.OPENAI_API_KEY);
 
 let apiUrl = "https://api.openai.com/v1/completions";
 
@@ -28,18 +28,20 @@ const headers = {
 async function generateTitle(category) {
   const params = {
     model: model,
-    prompt: "Imagine you are a journalist in a fictional world, no violence no real people references. Write a concise title for a " + category + "news related to Torvaianica: ",
+    prompt: "Imagine you are a journalist in a fictional world, . Write a concise title for a " + category + "news: ",
     temperature: temperature,
     max_tokens: 30,
   };
-
+  console.log("\n[generateTitle] API Call...");
   return await axios
     .post(apiUrl, params, { headers: headers })
     .then((response) => {
-      return response.data.choices[0].text.trim();
+      const title = response.data.choices[0].text.trim();
+      console.log("[generateTitle] Title generated!\n---> " + title);
+      return title;
     })
     .catch((error) => {
-      console.error("Error during title generation: ", error);
+      console.error("[generateTitle] Error during title generation: ", error);
     });
 }
 
@@ -51,13 +53,16 @@ async function generateContent(titlePrompt) {
     temperature: temperature,
     max_tokens: 800,
   };
+  console.log("\n[generateContent] API Call...");
   return await axios
     .post(apiUrl, contentParams, { headers: headers })
     .then((response) => {
+      const content = response.data.choices[0].text.trim();
+      console.log("[generateContent] Content generated!\n---> " + content);
       return response.data.choices[0].text.trim();
     })
     .catch((error) => {
-      console.error("Error during content genderation: ", error);
+      console.error("[generateContent] Error during content generation: ", error);
     });
 }
 
@@ -70,22 +75,21 @@ async function generateImage(titlePrompt) {
     n: 1,
     size: "256x256",
   };
-
-  console.log("\n###\nPROMPT IMG: " + imageParams.prompt + "\n###\n");
+  console.log("\n[generateImage] API Call...");
   return await axios
     .post(imageApiUrl, imageParams, { headers: headers })
     .then((response) => {
-      console.log("RICEVUTO: " + response.data + "\n\n");
+      const url = response.data.data[0].url;
+      console.log("[generateImage] Image generated!\n---> "+ url);
       return response.data.data[0].url;
     })
     .catch((error) => {
       if (error.response) {
-        console.log("Avatar error status: ", error.response.status);
-        console.log("Avatar error data: ", error.response.data);
+        console.log("[generateImage] Avatar error status: ", error.response.status);
+        console.log("[generateImage] Avatar error data: ", error.response.data);
       } else {
-        console.log("Avatar error message: ", error.message);
+        console.log("[generateImage] Avatar error message: ", error.message);
       }
-      console.error("Error during image generation:", error);
     });
 }
 
@@ -93,17 +97,22 @@ async function generateImage(titlePrompt) {
 async function insertIntoDB(title, content, category, imageUrl) {
   const client = new Client(pgConfig);
   try {
-    console.log("Connessione al db...");
+    console.log("[insertIntoDB] Connecting...");
     await client.connect();
-    const query = "INSERT INTO news (title, content, category, imageurl, date) VALUES ($1, $2, $3, $4, $5)";
+
+    let query = "INSERT INTO news (title, content, category, imageurl, date) VALUES ($1, $2, $3, $4, $5)";
     const date = new Date().toISOString().split("T")[0];
     const values = [title, content, category, imageUrl, date];
-    console.log("Query sul db...");
+    console.log("[insertIntoDB] Query to insert news...");
     await client.query(query, values);
+
+    console.log("[insertIntoDB] Query to delete null values...");
+    query = "DELETE FROM news WHERE imageurl IS NULL";
+    await client.query(query);
   } catch (error) {
-    console.error("Error during data insertion into DB: ", error);
+    console.error("[insertIntoDB] Error during data insertion into DB: ", error);
   } finally {
-    console.log("Chiudo db...");
+    console.log("[insertIntoDB] Disconnecting...");
     await client.end();
   }
 }
@@ -114,8 +123,6 @@ async function generateNewsData(category) {
     const title = await generateTitle(category);
     const content = await generateContent(title);
     const imageUrl = await generateImage(title);
-
-    console.log("Notizia generata: \n\n" + title + "\n\n" + content + "\n\n" + imageUrl + "\n\n\n");
 
     await insertIntoDB(title, content, category, imageUrl);
   } catch (error) {
