@@ -1,23 +1,18 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
+const bodyParser = require("body-parser");
 const app = express();
+const { Client } = require("pg");
 
-// app.js
-const postgres = require('postgres');
-require('dotenv').config();
+// DB Configuration
+const pgConfig = {
+  user: "dxeyhugp",
+  host: "horton.db.elephantsql.com",
+  database: "dxeyhugp",
+  password: "vdjLLvMZ83wlx6ilmDs20fx0DplSq_Wg",
+  port: 5432,
+};
 
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
-const URL = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?options=project%3D${ENDPOINT_ID}`;
-
-const sql = postgres(URL, { ssl: 'require' });
-
-async function getPgVersion() {
-  const result = await sql`select version()`;
-  console.log(result);
-}
-
-getPgVersion();
-
+// ### ### ###
 app.use(
   express.static("public", {
     setHeaders: function (res, path, stat) {
@@ -28,18 +23,90 @@ app.use(
   })
 );
 
+app.use(bodyParser.json());
+
 app.get("/", (req, res) => {
   res.sendFile("index.html");
 });
 
-app.get('/newsApp.js', function(req, res) {
-  res.type('application/javascript');
-  res.sendFile(__dirname + '/newsApp.js');
+app.get("/newsApp.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/newsApp.js");
 });
 
-app.get('/weatherApp.js', function(req, res) {
-  res.type('application/javascript');
-  res.sendFile(__dirname + '/weatherApp.js');
+app.get("/weather.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/weather.js");
+});
+
+app.get("/client-archive.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/client-archive.js");
+});
+
+app.get("/client-index.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/client-index.js");
+});
+
+app.get("/client-subscribe.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/client-subscribe.js");
+});
+
+app.get("/index", async (req, res) => {
+  const client = new Client(pgConfig);
+  try {
+    console.log("Connessione al db...");
+    await client.connect();
+    const query = "SELECT * FROM (SELECT * FROM news n ORDER BY date) news LIMIT 5";
+    console.log("Query sul db...");
+    const result = await client.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error during retrieval from DB: ", error);
+  } finally {
+    console.log("Chiudo db...");
+    await client.end();
+  }
+});
+
+app.get("/archive", async (req, res) => {
+  const client = new Client(pgConfig);
+  try {
+    console.log("\nConnessione al db...");
+    await client.connect();
+    const query = "SELECT * FROM news";
+    console.log("Query sul db...");
+    const result = await client.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error during retrieval from DB: ", error);
+  } finally {
+    console.log("Chiudo db...");
+    await client.end();
+  }
+});
+
+app.post("/subscribe", async (req, res) => {
+  const { email, firstName, lastName, password } = req.body;
+
+  const client = new Client(pgConfig);
+
+  try {
+    console.log("\n[subscribe] Connessione al db...");
+    await client.connect();
+    const query = "INSERT INTO users (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)";
+    console.log("[subscribe] Esecuzione della query sul db...");
+    await client.query(query, [email, firstName, lastName, password]);
+    res.json({ message: "Iscrizione avvenuta con successo!" });
+  } catch (error) {
+    console.error("[subscribe] Errore durante l'inserimento nel DB:", error);
+    res.status(500).json({ error: "Errore interno del server" });
+  } finally {
+    console.log("[subscribe] Chiusura connessione al db...");
+    await client.end();
+  }
 });
 
 const PORT = 51555;
