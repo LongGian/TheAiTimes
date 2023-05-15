@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { json } = require("express");
 const { Client } = require("pg");
 require("dotenv").config();
 
@@ -80,7 +81,7 @@ async function generateImage(titlePrompt) {
     .post(imageApiUrl, imageParams, { headers: headers })
     .then((response) => {
       const url = response.data.data[0].url;
-      console.log("[generateImage] Image generated!\n---> "+ url);
+      console.log("[generateImage] Image generated!\n---> " + url);
       return response.data.data[0].url;
     })
     .catch((error) => {
@@ -117,13 +118,33 @@ async function insertIntoDB(title, content, category, imageUrl) {
   }
 }
 
+async function createUrl(openaiUrl) {
+  const hostUrl = "https://freeimage.host/api/1/upload";
+
+  const hostParams = {
+    key: "6d207e02198a847aa98d0a2a901485a5",
+    action: "upload",
+    source: openaiUrl,
+  };
+  console.log("\n[createUrl] API Call...");
+  return await axios
+    .post(hostUrl, hostParams)
+    .then((response) => {
+      const url = response.image.url;
+      console.log("[createUrl] URL created!\n---> " + url);
+      return url;
+    })
+    .catch((error) => {
+      console.error("[createUrl] Cannot create URL: ", error);
+    });
+}
+
 // CALL ALL FUNCTIONS TO GENERATA NEWS DATA AND INSERT INTO DB
 async function generateNewsData(category) {
   try {
     const title = await generateTitle(category);
     const content = await generateContent(title);
     const imageUrl = await generateImage(title);
-
     await insertIntoDB(title, content, category, imageUrl);
   } catch (error) {
     console.error("Error generating news data:", error);

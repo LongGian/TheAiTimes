@@ -5,7 +5,6 @@ $(document).ready(() => {
         dataType: "json",
         success: (data) => {
             const newsList = $("#news-list");
-            console.log("\n\nDATA\n\n" + data);
             data.forEach((news) => {
                 newsList.append(
                     `
@@ -29,7 +28,7 @@ $(document).ready(() => {
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">${news.title.replace('"', '')}</h5>
-                                <small class="">${news.date.split('T')[0]}</small>
+                                <small class=""></small>
                             </div>
                         </div>
                     </div>
