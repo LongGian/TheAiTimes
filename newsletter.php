@@ -1,9 +1,9 @@
 <?php
 // Connessione al database
-$servername = "ep-mute-block-096682.eu-central-1.aws.neon.tech:5432";
-$username = "LongGian";
-$password = "Ag3sxDF2BEWO";
-$dbname = "neondb";
+$servername = "horton.db.elephantsql.com";
+$username = "dxeyhugp";
+$password = "vdjLLvMZ83wlx6ilmDs20fx0DplSq_Wg";
+$dbname = "dxeyhugp";
 
 $conn = pg_connect("host=$servername port=5432 dbname=$dbname user=$username password=$password");
 
