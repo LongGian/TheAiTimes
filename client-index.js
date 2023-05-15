@@ -7,9 +7,11 @@ $(document).ready(() => {
     type: "GET",
     dataType: "json",
     success: (data) => {
+      const content = data[0].content.length > 925 ? data[0].content.substring(0, 600) + '...' : data[0].content;
+
       $(".img0").attr("src", data[0].imageurl);
       $(".title0").text(data[0].title);
-      $(".content0").text(data[0].content);
+      $(".content0").text(content);
 
       const latestNews = $("#latest-news");
       for (let i = 0; i < data.length; i++) {

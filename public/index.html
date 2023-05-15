@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The AI Times</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -33,13 +34,21 @@
     <!-- MAIN -->
     <main class="container my-4" id="app">
       <!-- MAIN NEWS -->
-      <div class="row mb-4">
-        <div class="col-lg-6 img-container">
-          <img src="" class="card-img img0" obj alt="Immagine della notizia" />
-        </div>
+      <div class="row">
         <div class="col-lg-6">
-          <h2 class="card-title mt-3 mb-3 title0"></h2>
-          <p class="card-text content0"></p>
+          <div class="card mb-4" style="max-height: 400px; height: 400px">
+            <div class="card-body">
+              <h2 class="card-title mt-3 mb-3 title0"></h2>
+              <p class="card-text content0"></p>
+            </div>
+            <a href="" class="text-decoration-none text-dark">
+              <div class="card-footer text-center">Leggi la notizia completa</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-lg-6 img-container d-none d-lg-block">
+          <img src="https://placehold.co/800@2x.png" class="card-img img0" obj alt="Immagine della notizia" />
         </div>
       </div>
 
@@ -57,8 +66,6 @@
       </div>
 
       <!-- LATEST NEWS -->
-      <h3 class="display-6">Latest News</h3>
-
       <div class="row" id="latest-news"></div>
 
       <div class="row mb-3">

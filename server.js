@@ -59,7 +59,7 @@ app.get("/index", async (req, res) => {
   try {
     console.log("Connessione al db...");
     await client.connect();
-    const query = "SELECT * FROM (SELECT * FROM news n ORDER BY date) news LIMIT 5";
+    const query = "SELECT * FROM (SELECT * FROM news ORDER BY id DESC LIMIT 4) t ORDER BY id";
     console.log("Query sul db...");
     const result = await client.query(query);
     res.json(result.rows);
