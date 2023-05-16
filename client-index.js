@@ -9,9 +9,10 @@ $(document).ready(() => {
     success: (data) => {
       const content = data[0].content.length > 925 ? data[0].content.substring(0, 600) + '...' : data[0].content;
 
-      $(".img0").attr("src", data[0].imageurl);
-      $(".title0").text(data[0].title);
-      $(".content0").text(content);
+      $("#img-main").attr("src", data[0].imageurl);
+      $(".title-main").text(data[0].title);
+      $(".content-main").text(content);
+      $(".content-main-modal").text(data[0].content);
 
       const latestNews = $("#latest-news");
       for (let i = 0; i < data.length; i++) {
@@ -21,7 +22,7 @@ $(document).ready(() => {
           <div class="card mb-4" id="notizia1" data-bs-toggle="modal" data-bs-target="#notiziaModale${i}">
             <div class="position-relative">
               <img src="${data[i].imageurl}" class="card-img" alt="Immagine della notizia" />
-              <span class="badge bg-secondary position-absolute top-0 start-0 m-3">${data[i].category}</span>
+              <span class="badge bg-light text-secondary position-absolute top-0 start-0 m-3">${data[i].category}</span>
             </div>
             <div class="card-body">
               <h5 class="card-title">${data[i].title}</h5>

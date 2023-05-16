@@ -35,32 +35,32 @@
     <main class="container my-4" id="app">
       <!-- MAIN NEWS -->
       <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-6 d-none d-lg-block">
           <div class="card mb-4" style="max-height: 400px; height: 400px">
             <div class="card-body">
-              <h2 class="card-title mt-3 mb-3 title0"></h2>
-              <p class="card-text content0"></p>
+              <h2 class="card-title mt-3 mb-3 title-main"></h2>
+              <p class="card-text content-main"></p>
             </div>
-            <a href="" class="text-decoration-none text-dark">
-              <div class="card-footer text-center">Leggi la notizia completa</div>
+            <a href="#" class="text-decoration-none text-dark">
+              <div class="card-footer text-center" data-bs-toggle="modal" data-bs-target="#modal-main">Leggi la notizia completa</div>
             </a>
           </div>
         </div>
 
         <div class="col-lg-6 img-container d-none d-lg-block">
-          <img src="https://placehold.co/800@2x.png" class="card-img img0" obj alt="Immagine della notizia" />
+          <img src="https://placehold.co/800@2x.png" class="card-img img0" id="img-main" obj alt="Immagine della notizia" />
         </div>
       </div>
 
       <!-- MAIN MODAL -->
-      <div class="modal fade" id="notiziaModale0" tabindex="-1" aria-labelledby="notiziaModaleLabel" aria-hidden="true">
+      <div class="modal fade" id="modal-main" tabindex="-1" aria-labelledby="modal-main-label" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title title0" id="notiziaModaleLabel"></h5>
+              <h5 class="modal-title title-main" id="modal-main-label">${data[i].title}</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
             </div>
-            <div class="modal-body content0"></div>
+            <div class="modal-body content-main-modal">${data[i].content}</div>
           </div>
         </div>
       </div>
@@ -75,11 +75,11 @@
         </div>
       </div>
       <div class="row mb-3">
-        <div class="col">
-          <input type="email" class="form-control" id="newsletterEmail" placeholder="Type your email" />
-        </div>
-        <div class="col">
-          <button type="submit" class="btn btn-primary">Iscriviti</button>
+        <div class="mb-3 col-lg-6">
+          <div class="input-group">
+            <input type="email" class="form-control" id="newsletterEmail" placeholder="Type your email" />
+            <button type="submit" class="btn btn-primary">Iscriviti</button>
+          </div>
         </div>
       </div>
     </main>

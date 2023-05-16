@@ -22,7 +22,7 @@ $(document).ready(() => {
                                 alt="Immagine della notizia"
                               />
                               <span
-                                class="badge bg-secondary position-absolute top-0 start-0 m-3"
+                                class="badge bg-light text-secondary position-absolute top-0 start-0 m-3"
                                 >${news.category}</span
                               >
                             </div>
