@@ -2,7 +2,7 @@
 // Connessione al database
 $servername = "horton.db.elephantsql.com";
 $username = "dxeyhugp";
-$password = "vdjLLvMZ83wlx6ilmDs20fx0DplSq_Wg";
+$password = "GrDEM1FdeRba7cH3KQT1MPajUGBWytj0";
 $dbname = "dxeyhugp";
 
 $conn = pg_connect("host=$servername port=5432 dbname=$dbname user=$username password=$password");
