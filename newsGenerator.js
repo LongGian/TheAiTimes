@@ -163,7 +163,7 @@ async function generateNewsData(category) {
   }
 }
 
-const categories = ["politics", "economy", "science", "sport"];
+const categories = [/*"politics", "economy", "science", */"sport"];
 
 (async () => {
   for (const category of categories) {

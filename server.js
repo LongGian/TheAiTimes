@@ -2,17 +2,18 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const { Client } = require("pg");
+require("dotenv").config();
 
 // DB Configuration
 const pgConfig = {
-  user: "dxeyhugp",
-  host: "horton.db.elephantsql.com",
-  database: "dxeyhugp",
-  password: "vdjLLvMZ83wlx6ilmDs20fx0DplSq_Wg",
-  port: 5432,
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
 };
 
-// ### ### ###
+// Express Configuration
 app.use(
   express.static("public", {
     setHeaders: function (res, path, stat) {
@@ -25,6 +26,30 @@ app.use(
 
 app.use(bodyParser.json());
 
+// Functions
+let latestNews = [];
+let allNews = [];
+
+async function fetchAllNews() {
+  const client = new Client(pgConfig);
+  try {
+    console.log("\n[fetchAllNews] Connessione al db...");
+    await client.connect();
+    const query = "SELECT * FROM news ORDER BY id DESC";
+    console.log("[fetchAllNews] Query sul db...");
+    const result = await client.query(query);
+    allNews = result.rows;
+    latestNews = allNews.slice(0,4).reverse();;
+  } catch (error) {
+    console.error("[fetchAllNews] Error during retrieval from DB: ", error);
+  } finally {
+    console.log("[fetchAllNews] Chiudo db...");
+    await client.end();
+  }
+}
+fetchAllNews();
+
+// Routes
 app.get("/", (req, res) => {
   res.sendFile("index.html");
 });
@@ -54,38 +79,17 @@ app.get("/client-subscribe.js", function (req, res) {
   res.sendFile(__dirname + "/client-subscribe.js");
 });
 
+app.get("/client-topNews.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/client-topNews.js");
+});
+
 app.get("/index", async (req, res) => {
-  const client = new Client(pgConfig);
-  try {
-    console.log("Connessione al db...");
-    await client.connect();
-    const query = "SELECT * FROM (SELECT * FROM news ORDER BY id DESC LIMIT 4) t ORDER BY id";
-    console.log("Query sul db...");
-    const result = await client.query(query);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error during retrieval from DB: ", error);
-  } finally {
-    console.log("Chiudo db...");
-    await client.end();
-  }
+  res.json(latestNews);
 });
 
 app.get("/archive", async (req, res) => {
-  const client = new Client(pgConfig);
-  try {
-    console.log("\nConnessione al db...");
-    await client.connect();
-    const query = "SELECT * FROM news";
-    console.log("Query sul db...");
-    const result = await client.query(query);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error during retrieval from DB: ", error);
-  } finally {
-    console.log("Chiudo db...");
-    await client.end();
-  }
+  res.json(allNews);
 });
 
 app.post("/subscribe", async (req, res) => {
@@ -96,7 +100,8 @@ app.post("/subscribe", async (req, res) => {
   try {
     console.log("\n[subscribe] Connessione al db...");
     await client.connect();
-    const query = "INSERT INTO users (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)";
+    const query =
+      "INSERT INTO users (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)";
     console.log("[subscribe] Esecuzione della query sul db...");
     await client.query(query, [email, firstName, lastName, password]);
     res.json({ message: "Iscrizione avvenuta con successo!" });
@@ -107,6 +112,10 @@ app.post("/subscribe", async (req, res) => {
     console.log("[subscribe] Chiusura connessione al db...");
     await client.end();
   }
+});
+
+app.get("/topnews", async (req, res) => {
+  res.json(latestNews);
 });
 
 const PORT = 51555;

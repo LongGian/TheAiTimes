@@ -12,8 +12,21 @@ $(document).ready(() => {
         .get(url)
         .then((response) => {
           const data = response.data;
-
-          $("#weather").text(data.location.name + ", " + data.current.condition.text + " " + data.current.temp_c + "°C");
+          const weatherData =
+            data.location.name +
+            ", " +
+            data.current.condition.text +
+            " " +
+            data.current.temp_c +
+            "°C";
+          $("#weather").text(
+            data.location.name +
+              ", " +
+              data.current.condition.text +
+              " " +
+              data.current.temp_c +
+              "°C"
+          );
         })
         .catch((error) => {
           console.error("Error getting weather data:", error);
