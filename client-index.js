@@ -7,10 +7,7 @@ $(document).ready(() => {
     type: "GET",
     dataType: "json",
     success: (data) => {
-      const contentTruncated =
-        data[0].content.length > 925
-          ? data[0].content.substring(0, 600) + "..."
-          : data[0].content;
+      const contentTruncated = data[0].content.length > 925 ? data[0].content.substring(0, 600) + "..." : data[0].content;
 
       $("#img-main").attr("src", data[0].imageurl);
       $(".title-main").text(data[0].title);
@@ -28,10 +25,7 @@ $(document).ready(() => {
 
       const latestNews = $("#latest-news");
       for (let i = 0; i < data.length; i++) {
-        const titleTruncated =
-          data[i].title.length > 45
-            ? data[i].title.substring(0, 45) + "..."
-            : data[i].title;
+        const titleTruncated = data[i].title.length > 45 ? data[i].title.substring(0, 45) + "..." : data[i].title;
 
         latestNews.append(`
         <!-- NEWS -->
@@ -42,18 +36,9 @@ $(document).ready(() => {
               <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3">${data[i].category}</span>
             </div>
             <div class="card-body">
-              <h5 class="card-title">${titleTruncated}</h5>
+              <h5 class="card-title fw-bold">${titleTruncated}</h5>
             </div>
             
-            <div class="card-footer text-center">
-              <div class="btn-group" role="group" aria-label="Vote">
-                <button type="button" class="btn btn-outline-success vote-btn${i}" data-value="1">1</button>
-                <button type="button" class="btn btn-outline-success vote-btn${i}" data-value="2">2</button>
-                <button type="button" class="btn btn-outline-success vote-btn${i}" data-value="3">3</button>
-                <button type="button" class="btn btn-outline-success vote-btn${i}" data-value="4">4</button>
-                <button type="button" class="btn btn-outline-success vote-btn${i}" data-value="5">5</button>
-              </div>
-            </div>
           </div>
         </div>
         <!-- MODAL -->
@@ -93,9 +78,7 @@ $(document).ready(() => {
       }
     },
     error: (jqXHR, textStatus, errorThrown) => {
-      console.log(
-        `Errore durante la richiesta GET: ${textStatus} - ${errorThrown}`
-      );
+      console.log(`Errore durante la richiesta GET: ${textStatus} - ${errorThrown}`);
     },
   });
 });

@@ -24,7 +24,7 @@ $(document).ready(() => {
                 <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3">${data[i].category}</span>
               </div>
               <div class="card-body">
-                <h5 class="card-title">${titleTruncated}</h5>
+                <h5 class="card-title fw-bold">${titleTruncated}</h5>
               </div>
             </div>
           </div>
@@ -33,7 +33,7 @@ $(document).ready(() => {
             <div class="modal-dialog modal-dialog-scrollable">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="${modalLabelId}">${data[i].title}</h5>
+                  <h5 class="modal-title fw-bold" id="${modalLabelId}">${data[i].title}</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                 </div>
                 <div class="modal-body" id="${modalBodyId}"></div>

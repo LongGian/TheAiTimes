@@ -16,23 +16,25 @@ $(document).ready(() => {
 
       const latestNews = $("#latest-news");
       for (let i = 0; i < data.length; i++) {
-        const titleTruncated =
-          data[i].title.length > 45
-            ? data[i].title.substring(0, 45) + "..."
-            : data[i].title;
+        const titleTruncated = data[i].title.length > 45 ? data[i].title.substring(0, 45) + "..." : data[i].title;
 
         latestNews.append(`
         <div class="list-group-item d-flex justify-content-between align-items-center">
           ${titleTruncated}
-          <input type="number" name=" id="" min="1" max="5" class="col-1">
+          <select name="cars" id="cars">
+            <option value="audi"></option>
+            <option value="volvo">1</option>
+            <option value="saab">2</option>
+            <option value="opel">3</option>
+            <option value="audi">4</option>
+            <option value="audi">5</option>
+          </select>
         </div>
         `);
       }
     },
     error: (jqXHR, textStatus, errorThrown) => {
-      console.log(
-        `Errore durante la richiesta GET: ${textStatus} - ${errorThrown}`
-      );
+      console.log(`Errore durante la richiesta GET: ${textStatus} - ${errorThrown}`);
     },
   });
 });

@@ -1,6 +1,6 @@
 $(document).ready(() => {
   $("#subscribe-form").submit((event) => {
-    alert("sub");
+    alert("\n\nWEEEEEEEE: " + $("#email").val());
     event.preventDefault(); // Evita il comportamento di default del form
 
     const formData = {
@@ -9,6 +9,8 @@ $(document).ready(() => {
       lastName: $("#last-name").val(),
       password: $("#password").val(),
     };
+
+    
 
     $.ajax({
       url: "/subscribe",

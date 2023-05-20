@@ -1,88 +1,55 @@
 <!DOCTYPE html>
 <html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The AI Times</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      $(function () {
+        $("#header").load("./header.html");
+        $("#footer").load("./footer.html");
+      });
+    </script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0" />
-  <title>The AI Times</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-        crossorigin="anonymous" />
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script>
-    $(function () {
-      $("#header").load("./header.html");
-      $("#footer").load("./footer.html");
-    });
-  </script>
-</head>
+  <body class="bg-light">
+    <!-- HEADER -->
+    <div id="header"></div>
 
-<body>
-  <!-- HEADER -->
-  <div id="header"></div>
+    <!-- MAIN -->
+    <main class="container mb-4" id="subscribe-page">
+      <div class="row text-center">
+        <h2 class="display-6">Subscribe to The AI Times</h2>
+        <p class="lead">Stay informed with the latest news and updates.</p>
+      </div>
+      <div class="row m-auto">
+        <form action="" class="col-lg-4 col-md-8 m-auto" id="subscribe-form">
+          <input type="text" class="form-control mb-1" id="email" placeholder="Email" required />
+          <div class="input-group mb-1">
+            <input type="text" class="form-control ml-2" id="first-name" placeholder="First name" required />
+            <input type="text" class="form-control ml-2" id="last-name" placeholder="Last name" required />
+          </div>
+          <input type="password" class="form-control mb-1" id="password" placeholder="Password" required />
+          <input type="password" class="form-control mb-1" id="confirm-password" placeholder="Confirm password" required />
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="newsletter-checkbox" />
+            <label class="form-check-label text-secondary" for="newsletter-checkbox">Subscribe to newsletter</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 mb-4">Subscribe</button>
+        </form>
+      </div>
+    </main>
 
-  <!-- MAIN -->
-  <main class="container my-4"
-        id="subscribe-page">
-    <div class="row text-center">
-      <h2 class="display-6">Subscribe to The AI Times</h2>
-      <p class="lead">Stay informed with the latest news and updates.</p>
-    </div>
-    <div class="row m-auto">
-      <form action=""
-            class="col-lg-4 col-md-8 m-auto">
-        <input type="email"
-               class="form-control mb-1"
-               id="email"
-               placeholder="Email"
-               required />
-        <div class="input-group mb-1">
-          <input type="text"
-                 class="form-control ml-2"
-                 id="first-name"
-                 placeholder="First name"
-                 required />
-          <input type="text"
-                 class="form-control ml-2"
-                 id="last-name"
-                 placeholder="Last name"
-                 required />
-        </div>
-        <input type="password"
-               class="form-control mb-1"
-               id="password"
-               placeholder="Password"
-               required />
-        <input type="password"
-               class="form-control mb-1"
-               id="confirm-password"
-               placeholder="Confirm password"
-               required />
-        <div class="form-check mb-3">
-          <input class="form-check-input"
-                 type="checkbox"
-                 id="newsletter-checkbox">
-          <label class="form-check-label text-secondary"
-                 for="newsletter-checkbox">Subscribe to newsletter</label>
-        </div>
-        <button type="submit"
-                class="btn btn-primary w-100 mb-4">Subscribe</button>
-      </form>
-    </div>
-  </main>
+    <!-- FOOTER 
+    <div class="fixed-bottom" id="footer"></div>-->
 
-  <!-- FOOTER -->
-  <div id="footer"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-          crossorigin="anonymous"></script>
-  <script src="../weather.js"></script>
-  <script src="../client-subscribe.js"></script>
-</body>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script src="../weather.js"></script>
+    <script src="../client-subscribe.js"></script>
+  </body>
 </html>
