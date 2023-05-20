@@ -21,13 +21,13 @@ $(document).ready(() => {
         latestNews.append(`
         <div class="list-group-item d-flex justify-content-between align-items-center">
           ${titleTruncated}
-          <select name="cars" id="cars">
-            <option value="audi"></option>
-            <option value="volvo">1</option>
-            <option value="saab">2</option>
-            <option value="opel">3</option>
-            <option value="audi">4</option>
-            <option value="audi">5</option>
+          <select name="newsVote" id="newsVote${i}">
+            <option value=""></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
           </select>
         </div>
         `);

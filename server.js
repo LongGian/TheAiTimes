@@ -49,6 +49,12 @@ app.use((req, res, next) => {
 });*/
 
 // Functions
+
+function getWeather() {
+
+}
+
+
 let latestNews = [];
 let allNews = [];
 

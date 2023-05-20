@@ -8,9 +8,7 @@ $(document).ready(() => {
       firstName: $("#first-name").val(),
       lastName: $("#last-name").val(),
       password: $("#password").val(),
-    };
-
-    
+    };    
 
     $.ajax({
       url: "/subscribe",
