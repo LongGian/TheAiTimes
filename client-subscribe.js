@@ -1,14 +1,13 @@
 $(document).ready(() => {
   $("#subscribe-form").submit((event) => {
-    alert("\n\nWEEEEEEEE: " + $("#email").val());
-    event.preventDefault(); // Evita il comportamento di default del form
+    event.preventDefault();
 
     const formData = {
-      email: $("#email").val(),
+      email: $("#email0").val(),
       firstName: $("#first-name").val(),
       lastName: $("#last-name").val(),
-      password: $("#password").val(),
-    };    
+      password: $("#password0").val(),
+    };
 
     $.ajax({
       url: "/subscribe",
@@ -18,7 +17,7 @@ $(document).ready(() => {
       success: (response) => {
         console.log("Dati inviati con successo:", response);
       },
-      error: (jqXHR, textStatus, errorThrown) => {
+      error: ( jqXHR, textStatus, errorThrown) => {
         console.error("Errore durante la richiesta POST:", textStatus, errorThrown);
       },
     });

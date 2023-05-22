@@ -1,4 +1,5 @@
 $(document).ready(() => {
+  let loggedIn = false;
   $.ajax({
     url: "/topnews",
     type: "GET",
@@ -31,6 +32,16 @@ $(document).ready(() => {
           </select>
         </div>
         `);
+      }
+      if (loggedIn) {
+        $("#button-footer").append(`
+        <a href="subscribe.html" class="btn btn-primary">Confirm & Vote</a>
+      `);
+      }
+      else {
+        $("#button-footer").append(`
+        <a href="subscribe.html" class="btn btn-primary">Confirm & Vote</a>
+      `);
       }
     },
     error: (jqXHR, textStatus, errorThrown) => {

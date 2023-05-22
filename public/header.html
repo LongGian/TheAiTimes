@@ -40,15 +40,16 @@
     <div class="modal-dialog">
       <div class="modal-content m-auto">
         <div class="modal-header">
-          <h5 class="modal-title" id="loginModalLabel">Login</h5>
+          <h5 class="modal-title" id="loginModalLabel">Login to access all news</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form action="" class="m-auto">
+          <form action="" class="m-auto" id="login-form">
             <input type="email" class="form-control mb-1" id="email" placeholder="Email" required />
-            <input type="password" class="form-control mb-1" id="password" placeholder="Password" required />
-            <button type="submit" class="btn btn-primary w-100 mb-4">Subscribe</button>
+            <input type="password" class="form-control mb-3" id="password" placeholder="Password" required />
+            <button type="" class="btn btn-primary w-100 mb-2" onclick="loginFunc();">Login</button>
           </form>
+          <span class="small">Not registered? <a href="subscribe.html">Subscribe now</a> to The Ai Times!</span>
         </div>
       </div>
     </div>
