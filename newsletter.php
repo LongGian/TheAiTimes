@@ -1,37 +1,31 @@
 <?php
-// Connessione al database
-$servername = "horton.db.elephantsql.com";
-$username = "dxeyhugp";
-$password = "GrDEM1FdeRba7cH3KQT1MPajUGBWytj0";
-$dbname = "dxeyhugp";
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
-$conn = pg_connect("host=$servername port=5432 dbname=$dbname user=$username password=$password");
+//Load Composer's autoloader
+require 'vendor/autoload.php';
 
-// Verifica della connessione al database
-if (!$conn) {
-    die("Connessione fallita: " . pg_last_error()); // gestione errori
+$mail = new PHPMailer(true);
+// Configura i parametri del server SMTP
+$mail->isSMTP();
+$mail->Host = 'smtp.example.com';
+$mail->Port = 587;
+$mail->SMTPAuth = true;
+$mail->Username = 'tua_email@example.com';
+$mail->Password = 'tua_password';
+
+// Imposta il mittente e il destinatario
+$mail->setFrom('tua_email@example.com', 'Tuo Nome');
+$mail->addAddress('destinatario@example.com', 'Nome Destinatario');
+
+// Imposta il soggetto e il corpo dell'email
+$mail->Subject = 'Oggetto dell\'email';
+$mail->Body = 'Corpo del messaggio';
+
+// Invia l'email e controlla se l'invio è riuscito o no
+if ($mail->send()) {
+    echo 'Email inviata con successo!';
+} else {
+    echo 'Errore durante l\'invio dell\'email: ' . $mail->ErrorInfo;
 }
-
-// Recupero i destinatari dalla tabella "destinatari"
-$sql = "SELECT nome, email FROM destinatari";
-$result = pg_query($conn, $sql);
-
-// Ciclo su tutti i destinatari
-while($row = pg_fetch_assoc($result)) {
-    $nome = $row["nome"];
-    $email = $row["email"];
-
-    // Invio dell'email al destinatario
-    $to = $email;
-    $subject = "Newsletter mensile";
-    $message = "Ciao $nome,\n\nBenvenuto alla nostra newsletter mensile!";
-    $headers = "From: newsletter@TheAITimes.it" . "\r\n" .
-               "Questo è un messaggio a cui non si può rispondere" . "\r\n" .
-               "X-Mailer: PHP/" . phpversion();
-
-    mail($to, $subject, $message, $headers);
-}
-
-// Chiusura della connessione al database
-pg_close($conn);
-?>
