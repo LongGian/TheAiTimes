@@ -29,7 +29,7 @@ app.use(
 
 app.use(
   session({
-    secret: "paolodicanio",
+    secret: "paolodicanioamogus",
     resave: false,
     saveUninitialized: false,
   })
@@ -167,12 +167,6 @@ app.get("/topnews", async (req, res) => {
 // User registration
 app.post("/subscribe", async (req, res) => {
   const { email, firstName, lastName, password } = req.body;
-
-  console.log("Dati ricevuti:");
-  console.log("Email:", email);
-  console.log("First Name:", firstName);
-  console.log("Last Name:", lastName);
-  console.log("Password:", password);
 
   if (await isUserInDB(email)) {
     console.log("\n!!!EmailInUse!!!\n");
