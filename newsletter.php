@@ -1,36 +1,34 @@
 <?php
-//Import PHPMailer classes into the global namespace
-//These must be at the top of your script, not inside a function
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-
-//Database connection and Query 
+//Database connection and Query
 $db = pg_connect("host=horton.db.elephantsql.com dbname=dxeyhugp user=dxeyhugp password=GrDEM1FdeRba7cH3KQT1MPajUGBWytj0");
-$query = 'SELECT email FROM users WHERE newsletter==true';
+$query = 'SELECT email FROM users WHERE newsletter = true';
 $res = pg_query($db, $query);
 $row = pg_fetch_assoc($res);
 $people = $row['email'];
-//Load Composer's autoloader
-require 'vendor/autoload.php';
 
-//Create an instance; passing `true` enables exceptions
+require_once 'vendor/autoload.php';
+
+
 $mail = new PHPMailer(true);
 
 try {
     //Server settings
-    $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-    $mail->isSMTP();                                            //Send using SMTP
-    $mail->Host       = 'smtp.gmail.com';                     //Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-    $mail->Username   = 'theaitimesit@gmail.com';                     //SMTP username
-    $mail->Password   = 'viavozthcudwcaem';                               //SMTP password
-    $mail->SMTPSecure = 'ssl';            //Enable implicit TLS encryption
-    $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+    $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'theaitimesit@gmail.com';
+    $mail->Password = '';
+    $mail->SMTPSecure = 'ssl';
+    $mail->Port = 465;
 
-    //Recipients
     $mail->setFrom('theaitimesit@gmail.com', 'TheAiTimes');
-    while($row = pg_fetch_assoc($res)){
+
+    while ($row = pg_fetch_assoc($res)) {
         $mail->addAddress($row['email']);
     }                
     //Content
