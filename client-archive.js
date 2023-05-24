@@ -17,7 +17,7 @@ $(document).ready(() => {
 
         $("#news-list").append(`
           <!-- NEWS -->
-          <div class="col-lg-3">
+          <div class="col-lg-3 col-md-6">
             <div class="card mb-4" id="${cardId}" data-bs-toggle="modal" data-bs-target="#${modalId}">
               <div class="position-relative">
                 <img src="${data[i].imageurl}" class="card-img" alt="Immagine della notizia" />

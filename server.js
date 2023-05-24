@@ -142,6 +142,11 @@ app.get("/client-login.js", function (req, res) {
   res.sendFile(__dirname + "/client-login.js");
 });
 
+app.get("/dateTime.js", function (req, res) {
+  res.type("application/javascript");
+  res.sendFile(__dirname + "/dateTime.js");
+});
+
 // Routes for data retrieval
 app.get("/index", async (req, res) => {
   const response = {
@@ -200,25 +205,32 @@ app.post("/login", async (req, res) => {
   await client.connect();
   const query = "SELECT * FROM users WHERE email = ($1)";
   console.log("[/login] Querying the database...");
-  const result = await client.query(query, email);
-  const storedPassword = result.rows[0].password;
-  console.log("WEWE");
-  bcrypt.compare(password, storedPassword, (err, result) => {
-    if (err) {
-      console.error("Error in password verification:", err);
-      return res.sendStatus(500);
-    }
-    console.log("\nNoERR");
-    if (result) {
-      console.log("\nRES:true");
-      req.session.loggedIn = true;
-      req.session.userId = result.rows[0].email;
-      res.json({ loggedIn: true });
-    } else {
-      console.log("\nRES:false");
-      res.json({ loggedIn: false });
-    }
-  });
+  const result = await client.query(query, [email]);
+  console.log(result.rows[0]);
+  if (result.rows[0]) {
+    const storedPassword = result.rows[0].password;
+    bcrypt.compare(password, storedPassword, (err, resultCompare) => {
+      if (err) {
+        console.error("Error in password verification:", err);
+        return res.sendStatus(500);
+      }
+      console.log("\n", result.rows);
+      if (resultCompare) {
+        console.log("\nRES:true");
+        req.session.loggedIn = true;
+        req.session.userId = result.rows[0].email;
+
+        const { email, first_name, last_name } = result.rows[0];
+        res.json({ loggedIn: true, email, firstName: first_name, lastName: last_name });
+      } else {
+        console.log("\nRES:false");
+        res.json({ loggedIn: false });
+      }
+    });
+  } else {
+    console.log("Not registered!");
+    res.json({ loggedIn: false });
+  }
 });
 
 app.get("/", (req, res) => {
@@ -233,19 +245,23 @@ app.get("/amogus", async (req, res) => {
 // Weather data
 let weatherData = "";
 async function getWeather(lat, lon) {
-  const apiKey = "85967ba27fd4499bb4d135907232205";
-  const url = `https://api.weatherapi.com/v1/current.json`;
+  const apiKey = "1c1c8bb4564fa4482b830ffbe7daed37";
+  const url = `https://api.openweathermap.org/data/2.5/weather`;
   const params = {
-    key: apiKey,
-    q: lat + "," + lon,
+    lat: lat,
+    lon: lon,
+    appid: apiKey,
+    units: "metric",
   };
+
+  console.log(params);
 
   console.log("[getWeather] Getting weather for " + lat + ", " + lon + " ...");
 
   try {
     const response = await axios.get(url, { params });
     const data = response.data;
-    weatherData += data.location.name + ", " + data.current.condition.text + " " + data.current.temp_c + "°C";
+    weatherData += data.name + ", " + data.weather[0].description + " " + data.main.temp + "°C";
     console.log("Weather Data: " + weatherData);
   } catch (error) {
     console.error("Error getting weather data:", error);
