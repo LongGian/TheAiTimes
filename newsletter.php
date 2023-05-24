@@ -22,7 +22,7 @@ try {
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
     $mail->Username = 'theaitimesit@gmail.com';
-    $mail->Password = 'viavozthcudwcaem';
+    $mail->Password = '';
     $mail->SMTPSecure = 'ssl';
     $mail->Port = 465;
 
