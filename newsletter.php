@@ -33,11 +33,10 @@ try {
     while($row = pg_fetch_assoc($res)){
         $mail->addAddress($row['email']);
     }                
-
     //Content
     $mail->isHTML(true);                                  //Set email format to HTML
     $mail->Subject = 'Nuove News!';
-    $mail->Body    = 'Ciao! Se hai ricevuto questa email vuol dire che probabilmente ci sono novita sul nostro sito <b>NO REPLY</b>';
+    $mail->Body    = 'Ciao! Se hai ricevuto questa email vuol dire che probabilmente ci sono novita sul nostro sito \n <b>NO REPLY</b>';
     $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
     $mail->send();
