@@ -1,23 +1,28 @@
 $(document).ready(() => {
-  if (navigator.geolocation) {
+  let weatherData = "";
+  if (weatherData == "" && navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(async (position) => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
+      const data = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      };
 
-      // API call
-      const apiKey = "636825d70920404ca05101735230705";
-      const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&aqi=no`;
-
-      axios
-        .get(url)
-        .then((response) => {
-          const data = response.data;
-
-          $("#weather").text(data.location.name + ", " + data.current.condition.text + " " + data.current.temp_c);
-        })
-        .catch((error) => {
-          console.error("Error getting weather data:", error);
+      if (weatherData == "") {
+        $.ajax({
+          url: "/weather",
+          method: "POST",
+          data: JSON.stringify(data),
+          contentType: "application/json",
+          success: function (response) {
+            weatherData += response;
+            $("#weather").html(weatherData);
+          },
+          error: function (error) {
+            console.error("Error fetching weather data:", error);
+          },
         });
+      }
+      $("#weather").html(weatherData);
     });
   }
 });

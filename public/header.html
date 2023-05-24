@@ -1,37 +1,43 @@
 <header>
-  <div class="row text-center p-1 d-flex align-items-center">
-    <div class="col-4" id="weather">Loading weather...</div>
-
-    <div class="col-4 display-6">The AI Times</div>
-
-    <div class="col-4 align-self-center">
-      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-      <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signupModal">Signup</button>
-    </div>
+  <div class="container text-center mt-4 d-flex align-items-center">
+    <div class="col-4 text-secondary" id="weather">Loading weather...</div>
+    <a class="col-4 display-6 text-decoration-none text-dark" href="./index.html"><div>The AI Times</div></a>
+    <div class="col-4 text-secondary" id="currentDateTime">Loading time...</div>
   </div>
-  <div class="row">
-    <nav class="navbar navbar-expand-lg bg-light py-0">
-      <div class="container-fluid">
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse text-center justify-content-center" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="./index.html">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="./archive.html">Archive</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="./subscribe.html">Subscribe</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="./about.html">About Us</a>
-            </li>
-          </ul>
+  <div class="row mt-3">
+    <ul class="nav nav-pills justify-content-center">
+      <li class="nav-item">
+        <a class="nav-link" href="./index.html" id="navHome">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="./archive.html" id="navArchive">Archive</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="./subscribe.html" id="navSubscribe">Subscribe</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="./topNews.html" id="navTopNews">Top News</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content m-auto">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalLabel">Login to access all news</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="" class="m-auto" id="login-form">
+            <input type="email" class="form-control mb-1" id="email" placeholder="Email" required />
+            <input type="password" class="form-control mb-3" id="password" placeholder="Password" required />
+            <button type="" class="btn btn-primary w-100 mb-2" onclick="loginFunc();">Login</button>
+          </form>
+          <span class="small">Not registered? <a href="subscribe.html">Subscribe now</a> to The Ai Times!</span>
         </div>
       </div>
-    </nav>
+    </div>
   </div>
 </header>

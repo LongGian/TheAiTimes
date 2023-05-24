@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Noticia+Text&display=swap");
+
+* {
+  font-family: "Noticia Text", serif;
+}
+.img-container1 {
+  width: 800px;
+  height: 400px;
+}
+
+.img0 {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+}

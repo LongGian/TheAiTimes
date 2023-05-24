@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { json } = require("express");
 const { Client } = require("pg");
+const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
 
 // DB Configuration
@@ -11,6 +12,13 @@ const pgConfig = {
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
 };
+
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: "dzqwautro",
+  api_key: "597269481327486",
+  api_secret: "InuLzGq8fcVJqntmJ-GRjcz7yOo",
+});
 
 // OpenAI API Calls
 const temperature = 1;
@@ -37,7 +45,7 @@ async function generateTitle(category) {
   return await axios
     .post(apiUrl, params, { headers: headers })
     .then((response) => {
-      const title = response.data.choices[0].text.trim();
+      const title = response.data.choices[0].text.trim().replace(/["']/g, '');
       console.log("[generateTitle] Title generated!\n---> " + title);
       return title;
     })
@@ -60,7 +68,7 @@ async function generateContent(titlePrompt) {
     .then((response) => {
       const content = response.data.choices[0].text.trim();
       console.log("[generateContent] Content generated!\n---> " + content);
-      return response.data.choices[0].text.trim();
+      return response.data.choices[0].text.trim().replace(/["']/g, '');
     })
     .catch((error) => {
       console.error("[generateContent] Error during content generation: ", error);
@@ -74,7 +82,7 @@ async function generateImage(titlePrompt) {
   const imageParams = {
     prompt: titlePrompt + ", realistic photograph",
     n: 1,
-    size: "256x256",
+    size: "1024x1024",
   };
   console.log("\n[generateImage] API Call...");
   return await axios
@@ -118,25 +126,27 @@ async function insertIntoDB(title, content, category, imageUrl) {
   }
 }
 
-async function createUrl(openaiUrl) {
-  const hostUrl = "https://freeimage.host/api/1/upload";
+async function createUrl(tempUrl) {
+  const timestamp = Date.now();
+  console.log("\n[createUrl] Uploading image...");
+  const res = cloudinary.uploader.upload(tempUrl, { public_id: "img_" + timestamp });
 
-  const hostParams = {
-    key: "6d207e02198a847aa98d0a2a901485a5",
-    action: "upload",
-    source: openaiUrl,
-  };
-  console.log("\n[createUrl] API Call...");
-  return await axios
-    .post(hostUrl, hostParams)
-    .then((response) => {
-      const url = response.image.url;
-      console.log("[createUrl] URL created!\n---> " + url);
-      return url;
+  res
+    .then(() => {
+      console.log("[createUrl] Image uploaded!");
     })
-    .catch((error) => {
-      console.error("[createUrl] Cannot create URL: ", error);
+    .catch((err) => {
+      console.log(err);
     });
+
+  const url = cloudinary.url("img_" + timestamp, {
+    width: 256,
+    height: 256,
+    Crop: "fill",
+  });
+
+  console.log("[createUrl] Url created!");
+  return url;
 }
 
 // CALL ALL FUNCTIONS TO GENERATA NEWS DATA AND INSERT INTO DB
@@ -144,7 +154,9 @@ async function generateNewsData(category) {
   try {
     const title = await generateTitle(category);
     const content = await generateContent(title);
-    const imageUrl = await generateImage(title);
+    const tempUrl = await generateImage(title);
+    const imageUrl = await createUrl(tempUrl);
+
     await insertIntoDB(title, content, category, imageUrl);
   } catch (error) {
     console.error("Error generating news data:", error);
