@@ -20,9 +20,17 @@ $(document).ready(() => {
       success: (response) => {
         if (response.loggedIn) {
           document.cookie = "loggedIn=true; path=/";
-          document.cookie = `email=${resEmail}; path=/`;
-          document.cookie = `firstName=${resFirstName}; path=/`;
-          document.cookie = `lastName=${resLastName}; path=/`;
+          document.cookie = `email=${response.email}; path=/`;
+          document.cookie = `firstName=${response.firstName}; path=/`;
+          document.cookie = `lastName=${response.lastName}; path=/`;
+
+          function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+          }
+
+          alert(document.cookie + "\n" + getCookie("email"));
 
           // Crea il form per i dati dell'utente
           const userForm = $("<form>").attr("id", "user-form").addClass("col-8 m-auto");

@@ -46,7 +46,7 @@ async function fetchAllNews() {
   try {
     console.log("\n[fetchAllNews] Connecting to the database...");
     await client.connect();
-    const query = "SELECT * FROM news ORDER BY id DESC";
+    const query = "SELECT * FROM news ORDER BY unique_id DESC";
     console.log("[fetchAllNews] Querying the database...");
     const result = await client.query(query);
     allNews = result.rows;
@@ -227,13 +227,76 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/checkvote", async (req, res) => {
+  const { email } = req.body;
+  console.log("\n[/checkvote] email:", email);
+  const query = `SELECT has_voted_today FROM users WHERE email = $1`;
+
+  const client = new Client(pgConfig);
+  await client.connect(); // Connessione al database
+
+  await client.query(query, [email], (error, result) => {
+    if (error) {
+      console.log("Error checking vote:", error);
+      res.status(500).json({ error: "Internal server error" });
+    } else {
+      if (result.rows.length > 0) {
+        const hasVotedToday = result.rows[0].has_voted_today;
+        res.json({ hasVotedToday });
+      } else {
+        res.status(404).json({ error: "User not found" });
+      }
+    }
+
+    client.end(); // Chiusura della connessione al database
+  });
+});
+
+app.post("/submitvotes", (req, res) => {
+  const votes = req.body;
+  const queryUpdateNews = `UPDATE news SET score = score + $1 WHERE unique_id = $2`;
+  const queryUpdateUser = `UPDATE users SET has_voted_today = true WHERE email = $1`;
+
+  const client = new Client(pgConfig);
+  client.connect(); 
+
+  const promises = votes.map((vote) => {
+    const {email, newsId, score } = vote;
+    const valuesUpdateNews = [score, newsId];
+    const valuesUpdateUser = [email]; 
+
+    console.log("\n[/submitvotes] News " + newsId + " Adding " + score);
+
+    return client.query(queryUpdateNews, valuesUpdateNews)
+      .then(() => {
+        return client.query(queryUpdateUser, valuesUpdateUser);
+      })
+      .catch((error) => {
+        console.error("Error submitting vote:", error);
+      });
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      client.end(); 
+      res.json({ message: "Votes submitted successfully" });
+    })
+    .catch((error) => {
+      console.error("Error submitting votes:", error);
+      client.end(); 
+      res.status(500).json({ error: "Error submitting votes. Please try again later." });
+    });
+});
+
+
 app.get("/", (req, res) => {
   res.sendFile("index.html");
 });
 
-app.get("/amogus", async (req, res) => {
-  console.log("CIAO");
-  res.json({ loggedIn: false });
+app.get("/gettopnews", (req, res) => {
+  const sortedNews = allNews.sort((a, b) => b.score - a.score);
+  const topNews = sortedNews.slice(0, 4);
+  res.json(topNews);
 });
 
 // Weather data
