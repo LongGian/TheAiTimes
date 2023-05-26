@@ -1,13 +1,13 @@
-// Import dependencies
 require("dotenv").config();
 const express = require("express");
 const { Client } = require("pg");
-const app = express();
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
+const { exec } = require("child_process");
 
-// DB Configuration
+const app = express();
+
 const pgConfig = {
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
@@ -16,7 +16,6 @@ const pgConfig = {
   port: process.env.PG_PORT,
 };
 
-// Middleware Configuration
 app.use(
   express.static("public", {
     setHeaders: function (res, path, stat) {
@@ -37,11 +36,15 @@ app.use(
 
 app.use(express.json());
 
-// Functions
 let latestNews = [];
-let allNews = [];
+let allNews;
+
+// SECTION: Fuctions
+
+let weatherData = "";
 
 async function fetchAllNews() {
+  allNews = [];
   const client = new Client(pgConfig);
   try {
     console.log("\n[fetchAllNews] Connecting to the database...");
@@ -59,9 +62,8 @@ async function fetchAllNews() {
   }
 }
 
-async function saveUserToDB(email, firstName, lastName, hashedPassword, res) {
+async function saveUserToDB(email, firstName, lastName, hashedPassword) {
   const client = new Client(pgConfig);
-
   try {
     console.log("\n[saveUserToDB] Connecting to the database...");
     await client.connect();
@@ -80,7 +82,6 @@ async function saveUserToDB(email, firstName, lastName, hashedPassword, res) {
 
 async function isUserInDB(email) {
   const client = new Client(pgConfig);
-
   try {
     console.log("\n[isUserInDB] Connecting...");
     await client.connect();
@@ -88,219 +89,19 @@ async function isUserInDB(email) {
     console.log("[isUserInDB] Querying the database...");
     const result = await client.query(query);
     console.log(result.rows);
-    result.rows.forEach((row) => {
+    return result.rows.some((row) => {
       console.log(row.email + " == " + email);
-      if (row.email == email) return true;
+      return row.email == email;
     });
-    return false;
   } catch (error) {
     console.error("[isUserInDB] Error during retrieval from DB:", error);
-    res.status(500).json({ error: "Internal server error" });
+    throw new Error("Internal server error");
   } finally {
     console.log("[isUserInDB] Disconnecting...");
     await client.end();
   }
 }
 
-// Fetch initial news data
-fetchAllNews();
-
-// Routes
-// Serve JavaScript files
-app.get("/newsApp.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/newsApp.js");
-});
-
-app.get("/weather.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/weather.js");
-});
-
-app.get("/client-archive.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/client-archive.js");
-});
-
-app.get("/client-index.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/client-index.js");
-});
-
-app.get("/client-subscribe.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/client-subscribe.js");
-});
-
-app.get("/client-topNews.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/client-topNews.js");
-});
-
-app.get("/client-login.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/client-login.js");
-});
-
-app.get("/dateTime.js", function (req, res) {
-  res.type("application/javascript");
-  res.sendFile(__dirname + "/dateTime.js");
-});
-
-// Routes for data retrieval
-app.get("/index", async (req, res) => {
-  const response = {
-    loggedIn: req.session.loggedIn,
-    latestNews: latestNews,
-  };
-  res.json(response);
-});
-
-app.get("/archive", async (req, res) => {
-  res.json(allNews);
-});
-
-app.get("/topnews", async (req, res) => {
-  res.json(latestNews);
-});
-
-// User registration
-app.post("/subscribe", async (req, res) => {
-  const { email, firstName, lastName, password } = req.body;
-
-  if (await isUserInDB(email)) {
-    console.log("\n!!!EmailInUse!!!\n");
-    return res.status(409).send("Email already used");
-  }
-
-  bcrypt.hash(password, 10, (err, hashedPassword) => {
-    if (err) {
-      console.error("Error during password hashing:", err);
-      return res.sendStatus(500);
-    }
-
-    saveUserToDB(email, firstName, lastName, hashedPassword, res);
-
-    // Autentica l'utente dopo la registrazione
-    req.session.loggedIn = true;
-    req.session.email = email;
-    // Imposta altre variabili di sessione, se necessario
-
-    res.json({ success: true }); // Invia una risposta JSON al client
-  });
-});
-
-// User login
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  const client = new Client(pgConfig);
-  console.log("\n[/login] Connecting...");
-  await client.connect();
-  const query = "SELECT * FROM users WHERE email = ($1)";
-  console.log("[/login] Querying the database...");
-  const result = await client.query(query, [email]);
-  console.log(result.rows[0]);
-  if (result.rows[0]) {
-    const storedPassword = result.rows[0].password;
-    bcrypt.compare(password, storedPassword, (err, resultCompare) => {
-      if (err) {
-        console.error("Error in password verification:", err);
-        return res.sendStatus(500);
-      }
-      console.log("\n", result.rows);
-      if (resultCompare) {
-        console.log("\nRES:true");
-        req.session.loggedIn = true;
-        req.session.userId = result.rows[0].email;
-
-        const { email, first_name, last_name } = result.rows[0];
-        res.json({ loggedIn: true, email, firstName: first_name, lastName: last_name });
-      } else {
-        console.log("\nRES:false");
-        res.json({ loggedIn: false });
-      }
-    });
-  } else {
-    console.log("Not registered!");
-    res.json({ loggedIn: false });
-  }
-});
-
-app.post("/checkvote", async (req, res) => {
-  const { email } = req.body;
-  console.log("\n[/checkvote] email:", email);
-  const query = `SELECT has_voted_today FROM users WHERE email = $1`;
-
-  const client = new Client(pgConfig);
-  await client.connect(); // Connessione al database
-
-  await client.query(query, [email], (error, result) => {
-    if (error) {
-      console.log("Error checking vote:", error);
-      res.status(500).json({ error: "Internal server error" });
-    } else {
-      if (result.rows.length > 0) {
-        const hasVotedToday = result.rows[0].has_voted_today;
-        res.json({ hasVotedToday });
-      } else {
-        res.status(404).json({ error: "User not found" });
-      }
-    }
-
-    client.end(); // Chiusura della connessione al database
-  });
-});
-
-app.post("/submitvotes", (req, res) => {
-  const votes = req.body;
-  const queryUpdateNews = `UPDATE news SET score = score + $1 WHERE unique_id = $2`;
-  const queryUpdateUser = `UPDATE users SET has_voted_today = true WHERE email = $1`;
-
-  const client = new Client(pgConfig);
-  client.connect(); 
-
-  const promises = votes.map((vote) => {
-    const {email, newsId, score } = vote;
-    const valuesUpdateNews = [score, newsId];
-    const valuesUpdateUser = [email]; 
-
-    console.log("\n[/submitvotes] News " + newsId + " Adding " + score);
-
-    return client.query(queryUpdateNews, valuesUpdateNews)
-      .then(() => {
-        return client.query(queryUpdateUser, valuesUpdateUser);
-      })
-      .catch((error) => {
-        console.error("Error submitting vote:", error);
-      });
-  });
-
-  Promise.all(promises)
-    .then(() => {
-      client.end(); 
-      res.json({ message: "Votes submitted successfully" });
-    })
-    .catch((error) => {
-      console.error("Error submitting votes:", error);
-      client.end(); 
-      res.status(500).json({ error: "Error submitting votes. Please try again later." });
-    });
-});
-
-
-app.get("/", (req, res) => {
-  res.sendFile("index.html");
-});
-
-app.get("/gettopnews", (req, res) => {
-  const sortedNews = allNews.sort((a, b) => b.score - a.score);
-  const topNews = sortedNews.slice(0, 4);
-  res.json(topNews);
-});
-
-// Weather data
-let weatherData = "";
 async function getWeather(lat, lon) {
   const apiKey = "1c1c8bb4564fa4482b830ffbe7daed37";
   const url = `https://api.openweathermap.org/data/2.5/weather`;
@@ -325,11 +126,270 @@ async function getWeather(lat, lon) {
   }
 }
 
+fetchAllNews();
+
+// SECTION: Routes
+
+// Serve JavaScript file
+app.get("/newsApp.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/newsApp.js");
+});
+
+app.get("/weather.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/weather.js");
+});
+
+app.get("/client-archive.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/client-archive.js");
+});
+
+app.get("/client-index.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/client-index.js");
+});
+
+app.get("/client-subscribe.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/client-subscribe.js");
+});
+
+app.get("/client-topNews.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/client-topNews.js");
+});
+
+app.get("/client-login.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/client-login.js");
+});
+
+app.get("/dateTime.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/dateTime.js");
+});
+
+app.get("/client-admin.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/client-admin.js");
+});
+
+app.get("/newsGenerator.js", (req, res) => {
+  res.type("application/javascript").sendFile(__dirname + "/newsGenerator.js");
+});
+
+// Endpoints
+
+app.post("/unsubscribe", async (req, res) => {
+  const { email } = req.body;
+
+  const client = new Client(pgConfig);
+  try {
+    await client.connect();
+    const query = "DELETE FROM users WHERE email = $1";
+    await client.query(query, [email]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error unsubscribing user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await client.end();
+  }
+});
+
+app.post("/newsGenerator", (req, res) => {
+  let i = 0;
+  const apiKey = req.body.apiKey;
+  console.log("\n[/newsGenerator] Received API key:", apiKey);
+
+  const childProcess = exec(`node newsGenerator.js ${apiKey}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`[/newsGenerator] Error executing newsGenerator.js: ${error.message}`);
+      res.status(500).send("[/newsGenerator] Error executing newsGenerator.js");
+    } else {
+      fetchAllNews();
+      console.log("[/newsGenerator] newsGenerator.js executed!");
+    }
+  });
+
+  childProcess.stdout.on("data", (data) => {
+    console.log(data);
+    res.write(data);
+  });
+
+  childProcess.stderr.on("data", (data) => {
+    console.log("[/newsGenerator] Error during execution:");
+    console.error(i++ + ". " + data);
+  });
+
+  childProcess.on("close", () => {
+    res.end();
+  });
+});
+
+app.get("/index", (req, res) => {
+  const response = {
+    loggedIn: req.session.loggedIn,
+    latestNews: latestNews,
+  };
+  res.json(response);
+});
+
+app.get("/archive", (req, res) => {
+  res.json(allNews);
+});
+
+app.get("/topnews", (req, res) => {
+  res.json(latestNews);
+});
+
+app.post("/subscribe", async (req, res) => {
+  const { email, firstName, lastName, password } = req.body;
+
+  try {
+    if (await isUserInDB(email)) {
+      console.log("\n!!!EmailInUse!!!\n");
+      return res.status(409).send("Email already used");
+    }
+
+    bcrypt.hash(password, 10, async (err, hashedPassword) => {
+      if (err) {
+        console.error("Error during password hashing:", err);
+        return res.sendStatus(500);
+      }
+
+      await saveUserToDB(email, firstName, lastName, hashedPassword);
+      req.session.loggedIn = true;
+      req.session.email = email;
+
+      res.json({ success: true });
+    });
+  } catch (error) {
+    console.error("Error during user registration:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const client = new Client(pgConfig);
+  console.log("\n[/login] Connecting...");
+  await client.connect();
+  const query = "SELECT * FROM users WHERE email = ($1)";
+  console.log("[/login] Querying the database...");
+  const result = await client.query(query, [email]);
+  console.log(result.rows[0]);
+
+  try {
+    if (result.rows[0]) {
+      const storedPassword = result.rows[0].password;
+      bcrypt.compare(password, storedPassword, (err, resultCompare) => {
+        if (err) {
+          console.error("Error in password verification:", err);
+          return res.sendStatus(500);
+        }
+        console.log("\n", result.rows);
+        if (resultCompare) {
+          console.log("\nRES:true");
+          req.session.loggedIn = true;
+          req.session.userId = result.rows[0].email;
+
+          const { email, first_name, last_name } = result.rows[0];
+          res.json({ loggedIn: true, email, firstName: first_name, lastName: last_name });
+        } else {
+          console.log("\nRES:false");
+          res.json({ loggedIn: false });
+        }
+      });
+    } else {
+      console.log("Not registered!");
+      res.json({ loggedIn: false });
+    }
+  } catch (error) {
+    console.error("Error during user login:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    console.log("[/login] Disconnecting...");
+    await client.end();
+  }
+});
+
+app.post("/checkvote", async (req, res) => {
+  const { email } = req.body;
+  console.log("\n[/checkvote] email:", email);
+  const query = `SELECT has_voted_today FROM users WHERE email = $1`;
+
+  const client = new Client(pgConfig);
+
+  try {
+    console.log("\n[/checkvote] Connecting...");
+    await client.connect();
+    console.log("[/checkvote] Querying the database...");
+    const result = await client.query(query, [email]);
+
+    if (result.rows.length > 0) {
+      const hasVotedToday = result.rows[0].has_voted_today;
+      res.json({ hasVotedToday });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error checking vote:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    console.log("[/checkvote] Disconnecting...");
+    await client.end();
+  }
+});
+
+app.post("/submitvotes", async (req, res) => {
+  const votes = req.body;
+  const queryUpdateNews = `UPDATE news SET score = score + $1 WHERE unique_id = $2`;
+  const queryUpdateUser = `UPDATE users SET has_voted_today = true WHERE email = $1`;
+
+  const client = new Client(pgConfig);
+
+  try {
+    console.log("\n[/submitvotes] Connecting...");
+    await client.connect();
+
+    const promises = votes.map(async (vote) => {
+      const { email, newsId, score } = vote;
+      const valuesUpdateNews = [score, newsId];
+      const valuesUpdateUser = [email];
+
+      console.log("\n[/submitvotes] News " + newsId + " Adding " + score);
+
+      await client.query(queryUpdateNews, valuesUpdateNews);
+      await client.query(queryUpdateUser, valuesUpdateUser);
+    });
+
+    await Promise.all(promises);
+    await fetchAllNews();
+
+    res.json({ message: "Votes submitted successfully" });
+  } catch (error) {
+    console.error("Error submitting votes:", error);
+    res.status(500).json({ error: "Error submitting votes. Please try again later." });
+  } finally {
+    console.log("[/submitvotes] Disconnecting...");
+    await client.end();
+  }
+});
+
+app.get("/", (req, res) => {
+  res.sendFile("index.html");
+});
+
+app.get("/gettopnews", (req, res) => {
+  const sortedNews = allNews.sort((a, b) => b.score - a.score);
+  const topNews = sortedNews.slice(0, 4);
+  res.json(topNews);
+});
+
 app.post("/weather", async (req, res) => {
   const { lat, lon } = req.body;
-  if (weatherData == "") await getWeather(lat, lon);
+  if (weatherData == "") {
+    await getWeather(lat, lon);
+  }
   res.send(weatherData);
 });
+
+// SECTION: Start Listening
 
 const PORT = 51555;
 

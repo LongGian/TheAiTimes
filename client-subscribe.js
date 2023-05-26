@@ -1,3 +1,9 @@
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 $(document).ready(() => {
   const loginForm = $("#login-form");
   const subscribeForm = $("#subscribe-form");
@@ -24,13 +30,9 @@ $(document).ready(() => {
           document.cookie = `firstName=${response.firstName}; path=/`;
           document.cookie = `lastName=${response.lastName}; path=/`;
 
-          function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-          }
-
-          alert(document.cookie + "\n" + getCookie("email"));
+          resEmail = getCookie("email");
+          resFirstName = getCookie("firstName");
+          resLastName = getCookie("lastName");
 
           // Crea il form per i dati dell'utente
           const userForm = $("<form>").attr("id", "user-form").addClass("col-8 m-auto");
@@ -101,16 +103,35 @@ $(document).ready(() => {
     document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     location.reload();
   }
-  
+
+  function unsubscribe() {
+    document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+
+    $.ajax({
+      url: "/unsubscribe", // L'URL del server per gestire l'eliminazione dell'utente
+      type: "POST",
+      data: JSON.stringify({ email: resEmail }),
+      contentType: "application/json",
+      success: function (response) {
+        // Gestisci la risposta del server dopo l'eliminazione dell'utente
+        alert("User unsubscribed successfully");
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        // Gestisci eventuali errori durante la richiesta AJAX
+        console.error("Error:", textStatus, errorThrown);
+      },
+    });
+  }
   const loggedIn = document.cookie.includes("loggedIn=true");
   if (loggedIn) {
     const userForm = $("<form>").attr("id", "user-form").addClass("col-8 m-auto");
     const email = $("<input>").attr("type", "text").attr("id", "email").attr("name", "email").prop("disabled", true).addClass("form-control mb-1").val(resEmail);
     const firstName = $("<input>").attr("type", "text").attr("id", "first-name").attr("name", "first-name").prop("disabled", true).addClass("form-control mb-1").val(resFirstName);
     const lastName = $("<input>").attr("type", "text").attr("id", "last-name").attr("name", "last-name").prop("disabled", true).addClass("form-control mb-3").val(resLastName);
-    const logoutButton = $("<button>").attr("type", "button").text("Logout").addClass("btn btn-primary w-100 mb-4").click(logout);
+    const logoutButton = $("<button>").attr("type", "button").text("Logout").addClass("btn btn-primary w-100 mb-1").click(logout);
+    const unsubscribeButton = $("<button>").attr("type", "button").text("Unsubscribe").addClass("btn btn-outline-danger w-100 mb-4").click(unsubscribe);
 
-    userForm.append(email, firstName, lastName, logoutButton);
+    userForm.append(email, firstName, lastName, logoutButton, unsubscribeButton);
     loginForm.replaceWith(userForm);
 
     // Effettua una chiamata AJAX per ottenere i dati dell'utente
