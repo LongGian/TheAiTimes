@@ -13,3 +13,8 @@
   max-height: 400px;
   object-fit: cover;
 }
+
+.console {
+  font-family: 'Courier New', monospace;
+  height: 400px;
+}

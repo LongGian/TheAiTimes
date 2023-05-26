@@ -2,6 +2,7 @@ const axios = require("axios");
 const { json } = require("express");
 const { Client } = require("pg");
 const cloudinary = require("cloudinary").v2;
+const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 
 // DB Configuration
@@ -23,8 +24,9 @@ cloudinary.config({
 // OpenAI API Calls
 const temperature = 1;
 const model = "text-davinci-003";
-const apiKey = process.env.OPENAI_API_KEY;
-console.log(process.env.OPENAI_API_KEY);
+const apiKey = process.argv[2];
+
+console.log("[FILE: newsGenerator.js] I'm running... with API key:", apiKey);
 
 let apiUrl = "https://api.openai.com/v1/completions";
 
@@ -45,7 +47,7 @@ async function generateTitle(category) {
   return await axios
     .post(apiUrl, params, { headers: headers })
     .then((response) => {
-      const title = response.data.choices[0].text.trim().replace(/["']/g, '');
+      const title = response.data.choices[0].text.trim().replace(/["']/g, "");
       console.log("[generateTitle] Title generated!\n---> " + title);
       return title;
     })
@@ -68,7 +70,7 @@ async function generateContent(titlePrompt) {
     .then((response) => {
       const content = response.data.choices[0].text.trim();
       console.log("[generateContent] Content generated!\n---> " + content);
-      return response.data.choices[0].text.trim().replace(/["']/g, '');
+      return response.data.choices[0].text.trim().replace(/["']/g, "");
     })
     .catch((error) => {
       console.error("[generateContent] Error during content generation: ", error);
@@ -102,16 +104,21 @@ async function generateImage(titlePrompt) {
     });
 }
 
-// INSERT DATA INTO DB
-async function insertIntoDB(title, content, category, imageUrl) {
+// INSERT DATA INTO DB w/ GROUP_ID
+
+function generateGroupId() {
+  return uuidv4();
+}
+
+async function insertIntoDB(title, content, category, imageUrl, groupId) {
   const client = new Client(pgConfig);
   try {
-    console.log("[insertIntoDB] Connecting...");
+    console.log("\n[insertIntoDB] Connecting...");
     await client.connect();
 
-    let query = "INSERT INTO news (title, content, category, imageurl, date) VALUES ($1, $2, $3, $4, $5)";
+    let query = "INSERT INTO news (title, content, category, imageurl, date, group_id) VALUES ($1, $2, $3, $4, $5, $6)";
     const date = new Date().toISOString().split("T")[0];
-    const values = [title, content, category, imageUrl, date];
+    const values = [title, content, category, imageUrl, date, groupId];
     console.log("[insertIntoDB] Query to insert news...");
     await client.query(query, values);
 
@@ -125,7 +132,6 @@ async function insertIntoDB(title, content, category, imageUrl) {
     await client.end();
   }
 }
-
 async function createUrl(tempUrl) {
   const timestamp = Date.now();
   console.log("\n[createUrl] Uploading image...");
@@ -150,23 +156,24 @@ async function createUrl(tempUrl) {
 }
 
 // CALL ALL FUNCTIONS TO GENERATA NEWS DATA AND INSERT INTO DB
-async function generateNewsData(category) {
+async function generateNewsData(category, groupId) {
   try {
     const title = await generateTitle(category);
     const content = await generateContent(title);
     const tempUrl = await generateImage(title);
     const imageUrl = await createUrl(tempUrl);
 
-    await insertIntoDB(title, content, category, imageUrl);
+    await insertIntoDB(title, content, category, imageUrl, groupId);
   } catch (error) {
-    console.error("Error generating news data:", error);
+    console.error("\nError generating news data:", error);
   }
 }
 
 const categories = ["politics", "economy", "science", "sport"];
 
 (async () => {
+  const groupId = generateGroupId();
   for (const category of categories) {
-    await generateNewsData(category);
+    await generateNewsData(category, groupId);
   }
 })();
