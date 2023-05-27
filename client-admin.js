@@ -3,7 +3,6 @@ $(document).ready(function () {
     let apiKey = $("#apiKey").val();
 
     if (apiKey.length > 0) {
-      // Resettare la console
       $("#consoleOutput").val("");
 
       $.ajax({
@@ -16,6 +15,17 @@ $(document).ready(function () {
           let consoleOutput = $("#consoleOutput");
           let currentText = consoleOutput.val();
           consoleOutput.val(currentText + response);
+
+          $.ajax({
+            url: "/resetVote",
+            type: "GET",
+            success: function () {
+              console.log("Vote reset successful");
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              console.error("Error resetting vote:", textStatus, errorThrown);
+            },
+          });
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.error("Error:", textStatus, errorThrown);

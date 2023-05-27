@@ -62,14 +62,14 @@ async function fetchAllNews() {
   }
 }
 
-async function saveUserToDB(email, firstName, lastName, hashedPassword) {
+async function saveUserToDB(email, firstName, lastName, hashedPassword, newsletter) {
   const client = new Client(pgConfig);
   try {
     console.log("\n[saveUserToDB] Connecting to the database...");
     await client.connect();
-    const query = "INSERT INTO users (email, first_name, last_name, password) VALUES ($1, $2, $3, $4)";
+    const query = "INSERT INTO users (email, first_name, last_name, password, newsletter) VALUES ($1, $2, $3, $4, $5)";
     console.log("[saveUserToDB] Executing query on the database...");
-    await client.query(query, [email, firstName, lastName, hashedPassword]);
+    await client.query(query, [email, firstName, lastName, hashedPassword, newsletter]);
     console.log("\n[saveUserToDB] User inserted!");
   } catch (error) {
     console.error("[saveUserToDB] Error during database insertion:", error);
@@ -155,10 +155,6 @@ app.get("/client-topNews.js", (req, res) => {
   res.type("application/javascript").sendFile(__dirname + "/client-topNews.js");
 });
 
-app.get("/client-login.js", (req, res) => {
-  res.type("application/javascript").sendFile(__dirname + "/client-login.js");
-});
-
 app.get("/dateTime.js", (req, res) => {
   res.type("application/javascript").sendFile(__dirname + "/dateTime.js");
 });
@@ -237,7 +233,7 @@ app.get("/topnews", (req, res) => {
 });
 
 app.post("/subscribe", async (req, res) => {
-  const { email, firstName, lastName, password } = req.body;
+  const { email, firstName, lastName, password, newsletter } = req.body;
 
   try {
     if (await isUserInDB(email)) {
@@ -251,7 +247,7 @@ app.post("/subscribe", async (req, res) => {
         return res.sendStatus(500);
       }
 
-      await saveUserToDB(email, firstName, lastName, hashedPassword);
+      await saveUserToDB(email, firstName, lastName, hashedPassword, newsletter);
       req.session.loggedIn = true;
       req.session.email = email;
 
@@ -367,6 +363,27 @@ app.post("/submitvotes", async (req, res) => {
     res.status(500).json({ error: "Error submitting votes. Please try again later." });
   } finally {
     console.log("[/submitvotes] Disconnecting...");
+    await client.end();
+  }
+});
+
+app.get("/resetVote", async (req, res) => {
+  const query = `UPDATE users SET has_voted_today = false`;
+
+  const client = new Client(pgConfig);
+
+  try {
+    console.log("\n[/resetVote] Connecting...");
+    await client.connect();
+    console.log("[/resetVote] Querying the database...");
+    await client.query(query);
+    console.log("[/resetVote] Vote reset successful");
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("[/resetVote] Error resetting vote:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    console.log("[/resetVote] Disconnecting...");
     await client.end();
   }
 });

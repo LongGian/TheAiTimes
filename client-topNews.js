@@ -35,19 +35,21 @@ $(document).ready(() => {
       const newsToVote = $("#news-to-vote");
 
       data.forEach((news) => {
-        const titleTruncated = news.title.length > 45 ? news.title.substring(0, 45) + "..." : news.title;
+        const titleTruncated = news.title;
 
         newsToVote.append(`
-          <div class="list-group-item d-flex justify-content-between align-items-center">
-            ${titleTruncated}
-            <select name="newsVote" id="newsVote${news.unique_id}">
-              <option value=""></option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
+          <div class="row list-group-item d-flex">
+            <div class="col-11 text-start">${titleTruncated}</div>
+            <div class="col-1">
+            <select name="newsVote" class="" id="newsVote${news.unique_id}">
+            <option value=""></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+            </div>
           </div>
         `);
       });
@@ -70,7 +72,12 @@ $(document).ready(() => {
           .get();
 
         if (selectedOptions.includes("")) {
-          alert("Please select a vote for each news.");
+          const alertMessage = $("<div class='alert alert-warning my-1'>Please select a vote for each news.</div>");
+          $("#voting-form").after(alertMessage);
+
+          setTimeout(() => {
+            alertMessage.remove();
+          }, 3000);
           return;
         }
 
@@ -85,7 +92,12 @@ $(document).ready(() => {
           contentType: "application/json",
           success: (response) => {
             if (response.hasVotedToday) {
-              alert("You have already voted for today's news. Please wait for new news to vote again.");
+              const alertMessage = $("<div class='alert alert-warning my-1'>You have already voted for today's news. Please wait for new news to vote again.</div>");
+              $("#voting-form").after(alertMessage);
+
+              setTimeout(() => {
+                alertMessage.remove();
+              }, 3000);
             } else {
               // User can submit the votes
               const votes = [];
@@ -110,8 +122,12 @@ $(document).ready(() => {
                 data: JSON.stringify(votes),
                 contentType: "application/json",
                 success: (response) => {
-                  console.log("Votes submitted successfully:", response);
-                  alert("Votes submitted successfully!");
+                  const alertMessage = $("<div class='alert alert-success my-1'>Votes submitted successfully! Stay tuned for new news.</div>");
+                  $("#voting-form").after(alertMessage);
+
+                  setTimeout(() => {
+                    alertMessage.remove();
+                  }, 3000);
                 },
                 error: (jqXHR, textStatus, errorThrown) => {
                   console.error("Error submitting votes:", textStatus, errorThrown);
@@ -146,9 +162,9 @@ $(document).ready(() => {
         const titleTruncated = news.title;
 
         topNewsCard.append(`
-          <div class="list-group-item d-flex justify-content-between align-items-center">
-            ${titleTruncated}
-            <span class="badge bg-primary">${news.score}</span>
+          <div class="row list-group-item d-flex">
+            <div class="col-11 text-start">${titleTruncated}</div>
+            <div class="col-1"><span class="badge bg-primary">${news.score}</span></div>
           </div>
         `);
       });
