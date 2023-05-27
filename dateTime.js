@@ -1,3 +1,5 @@
+// Widget per data e ora 
+
 function getCurrentDateTime() {
   let currentDateTime = new Date();
 

@@ -5,6 +5,8 @@ document.getElementById("subscribe-form").addEventListener("submit", function (e
   let passwordInput = document.getElementById("password");
   let confirmPasswordInput = document.getElementById("confirm-password");
 
+//Validazione della correttezza dei campi del form compilato
+
   if (!isValidEmail(emailInput.value)) {
     alert("Please enter a valid email address.");
     return;

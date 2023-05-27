@@ -1,3 +1,5 @@
+// Widget per il meteo, che richiede la posizione quando si accede per la prima volta nella sessione al sito
+
 $(document).ready(() => {
   let weatherData = "";
   if (weatherData == "" && navigator.geolocation) {
