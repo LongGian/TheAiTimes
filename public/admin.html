@@ -25,16 +25,19 @@
 
     <!-- MAIN -->
     <main class="container">
-      <div class="row mt-4" id="inputKey">
-        <div class="col-lg-6 input-group">
-          <input type="text" class="form-control" id="apiKey" name="apiKey" placeholder="Insert your API key" />
-          <button class="btn btn-primary" id="startScriptBtn">Generate News</button>
+      <!-- Sezione Console -->
+      <div id="consoleSection">
+        <div class="row my-4" id="inputKey">
+          <div class="col-lg-6 input-group">
+            <input type="text" class="form-control" id="apiKey" name="apiKey" placeholder="Insert your API key" />
+            <button class="btn btn-primary" id="startScriptBtn">Generate News</button>
+          </div>
         </div>
-      </div>
 
-      <div class="row mt-4">
-        <div class="col-lg-12">
-          <textarea class="form-control bg-dark text-white p-3 console" id="consoleOutput" rows="10" readonly placeholder="Console output will appear here..."></textarea>
+        <div class="row">
+          <div class="col-lg-12">
+            <textarea class="form-control bg-dark text-white p-3 console" id="consoleOutput" rows="10" readonly placeholder="Console output will appear here..."></textarea>
+          </div>
         </div>
       </div>
     </main>

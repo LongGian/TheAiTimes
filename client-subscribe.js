@@ -4,11 +4,11 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
+let resEmail, resFirstName, resLastName;
+
 $(document).ready(() => {
   const loginForm = $("#login-form");
   const subscribeForm = $("#subscribe-form");
-
-  let resEmail, resFirstName, resLastName;
 
   loginForm.submit((event) => {
     event.preventDefault();
@@ -34,25 +34,25 @@ $(document).ready(() => {
           resFirstName = getCookie("firstName");
           resLastName = getCookie("lastName");
 
-          // Crea il form per i dati dell'utente
           const userForm = $("<form>").attr("id", "user-form").addClass("col-8 m-auto");
           const email = $("<input>").attr("type", "text").attr("id", "email").attr("name", "email").val(response.email).prop("disabled", true).addClass("form-control mb-1");
           const firstName = $("<input>").attr("type", "text").attr("id", "first-name").attr("name", "first-name").val(response.firstName).prop("disabled", true).addClass("form-control mb-1");
           const lastName = $("<input>").attr("type", "text").attr("id", "last-name").attr("name", "last-name").val(response.lastName).prop("disabled", true).addClass("form-control mb-3");
-          const logoutButton = $("<button>").attr("type", "button").text("Logout").addClass("btn btn-primary w-100 mb-4").click(logout);
+          const logoutButton = $("<button>").attr("type", "button").text("Logout").addClass("btn btn-primary w-100 mb-1").click(logout);
+          const unsubscribeButton = $("<button>").attr("type", "button").text("Unsubscribe").addClass("btn btn-outline-danger w-100").click(unsubscribe);
 
-          userForm.append(email, firstName, lastName, logoutButton);
+          userForm.append(email, firstName, lastName, logoutButton, unsubscribeButton);
           loginForm.replaceWith(userForm);
 
           const alertMessage = $('<div class="alert alert-success mt-1">Welcome back!</div>');
-          userForm.after(alertMessage);
+          unsubscribeButton.after(alertMessage);
 
           setTimeout(() => {
             alertMessage.remove();
           }, 3000);
         } else {
           const alertMessage = $('<div class="alert alert-danger mt-1">Invalid login credentials</div>');
-          loginForm.after(alertMessage);
+          $("#login-button").after(alertMessage);
 
           setTimeout(() => {
             alertMessage.remove();
@@ -69,34 +69,50 @@ $(document).ready(() => {
   subscribeForm.submit((event) => {
     event.preventDefault();
 
-    const formData = {
-      email: $("#email-subscribe").val(),
-      firstName: $("#first-name").val(),
-      lastName: $("#last-name").val(),
-      password: $("#password-subscribe").val(),
-    };
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let emailValidation = emailRegex.test($("#email-subscribe").val());
+    let passwordValidation = $("#password-subscribe").val() == $("#confirm-password").val();
 
-    $.ajax({
-      url: "/subscribe",
-      type: "POST",
-      data: JSON.stringify(formData),
-      contentType: "application/json",
-      success: (response) => {
-        console.log("Dati inviati con successo:", response);
+    if (emailValidation && passwordValidation) {
+      const formData = {
+        email: $("#email-subscribe").val(),
+        firstName: $("#first-name").val(),
+        lastName: $("#last-name").val(),
+        password: $("#password-subscribe").val(),
+        newsletter: $("#newsletter-checkbox").prop("checked"),
+      };
 
-        subscribeForm[0].reset();
+      $.ajax({
+        url: "/subscribe",
+        type: "POST",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        success: (response) => {
+          console.log("Dati inviati con successo:", response);
 
-        const alertMessage = $('<div class="alert alert-success mt-1">Registrazione completata con successo!</div>');
-        subscribeForm.after(alertMessage);
+          subscribeForm[0].reset();
 
-        setTimeout(() => {
-          alertMessage.remove();
-        }, 3000);
-      },
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Errore durante la richiesta POST:", textStatus, errorThrown);
-      },
-    });
+          const alertMessage = $('<div class="alert alert-success mt-1">You are now subscribed!</div>');
+          $("#subscribe-button").after(alertMessage);
+
+          setTimeout(() => {
+            alertMessage.remove();
+          }, 3000);
+        },
+        error: (jqXHR, textStatus, errorThrown) => {
+          const alertMessage = $('<div class="alert alert-danger mt-1">Error during subscription, please retry later</div>');
+          $("#subscribe-button").after(alertMessage);
+          console.error("Errore durante la richiesta POST:", textStatus, errorThrown);
+        },
+      });
+    } else {
+      const alertMessage = $('<div class="alert alert-danger mt-1">Passwords do not match</div>');
+      $("#subscribe-button").after(alertMessage);
+
+      setTimeout(() => {
+        alertMessage.remove();
+      }, 3000);
+    }
   });
 
   function logout() {
@@ -113,7 +129,7 @@ $(document).ready(() => {
       data: JSON.stringify({ email: resEmail }),
       contentType: "application/json",
       success: function (response) {
-        // Gestisci la risposta del server dopo l'eliminazione dell'utente
+        logout();
         alert("User unsubscribed successfully");
       },
       error: function (jqXHR, textStatus, errorThrown) {
@@ -122,8 +138,14 @@ $(document).ready(() => {
       },
     });
   }
-  const loggedIn = document.cookie.includes("loggedIn=true");
+
+  const loggedIn = getCookie("loggedIn");
+
   if (loggedIn) {
+    resEmail = getCookie("email");
+    resFirstName = getCookie("firstName");
+    resLastName = getCookie("lastName");
+
     const userForm = $("<form>").attr("id", "user-form").addClass("col-8 m-auto");
     const email = $("<input>").attr("type", "text").attr("id", "email").attr("name", "email").prop("disabled", true).addClass("form-control mb-1").val(resEmail);
     const firstName = $("<input>").attr("type", "text").attr("id", "first-name").attr("name", "first-name").prop("disabled", true).addClass("form-control mb-1").val(resFirstName);
@@ -133,22 +155,5 @@ $(document).ready(() => {
 
     userForm.append(email, firstName, lastName, logoutButton, unsubscribeButton);
     loginForm.replaceWith(userForm);
-
-    // Effettua una chiamata AJAX per ottenere i dati dell'utente
-    $.ajax({
-      url: "/getUserData",
-      type: "GET",
-      dataType: "json",
-      success: (response) => {
-        if (response.loggedIn) {
-          email.val(response.email);
-          firstName.val(response.firstName);
-          lastName.val(response.lastName);
-        }
-      },
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Errore durante la richiesta GET:", textStatus, errorThrown);
-      },
-    });
   }
 });
