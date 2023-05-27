@@ -1,10 +1,19 @@
+/*
+  Client che gestisce la pagina Top News, dove è possibile votare la "veridicità"
+  delle notizie del giorno, e vedere quali sono le top notizie più "veritiere".
+  Un utente (loggato) può votare solo le ultime notizie, deve attendere nuove
+  notizie per votare di nuovo. 
+*/
+
 $(document).ready(() => {
+  // Funzione per ottenere il valore di un dato cookie
   function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(";").shift();
   }
 
+  // Controlla tramite cookie "loggedIn" se l'utente è loggato
   const checkLoggedIn = () => {
     const loggedInCookie = document.cookie
       .split(";")
@@ -16,9 +25,7 @@ $(document).ready(() => {
 
   const loggedIn = checkLoggedIn();
 
-  //
-  // TODAY'S NEWS TO VOTE
-  //
+  // Richiede al server le notizie del giorno da mostrare
   $.ajax({
     url: "/topnews",
     type: "GET",
@@ -34,6 +41,7 @@ $(document).ready(() => {
 
       const newsToVote = $("#news-to-vote");
 
+      // Aggiunge le notizie del giorno da votare nella sezione #news-to-vote
       data.forEach((news) => {
         const titleTruncated = news.title;
 

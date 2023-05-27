@@ -1,26 +1,33 @@
+/*
+  Client che gestisce la landing page del sito, in cui vengono mostrate
+  le notizie del giorno, con possibilità di leggere una notizia "free".
+  Per leggere tutti i contenuti è necessario eseguire la registrazione/login.
+*/
+
 $(document).ready(() => {
-  // Function to handle the click event on the news card
+  // Gestisce il click su una news card
+  // Se l'utente è loggato mostra il modale corrispondente
+  // Se non loggato reindirizza alla registrazione/login
   const handleCardClick = (index) => {
     if (checkLoggedIn()) {
-      // User is logged in, open the modal
       $(`#notiziaModale${index}`).modal("show");
     } else {
-      // User is not logged in, redirect to subscribe.html
       window.location.href = "./subscribe.html";
     }
   };
 
-  // Function to check if the user is logged in
+  // Controlla tramite cookie "loggedIn" se l'utente è loggato
   const checkLoggedIn = () => {
     const loggedInCookie = document.cookie
       .split(";")
       .map((cookie) => cookie.trim().split("="))
       .find((cookie) => cookie[0] === "loggedIn");
 
+    // True se "loggedIn" esiste e il suo valore è "true"
     return loggedInCookie && loggedInCookie[1] === "true";
   };
 
-  // Function to display the main news
+  // Mostra la notizia principale nella sezione #main-news
   const displayMainNews = (data) => {
     const mainNews = data[0];
 
@@ -29,7 +36,7 @@ $(document).ready(() => {
         <div class="card mb-4" style="max-height: 400px; height: 400px">
           <div class="card-body" style="overflow-y: scroll;">
             <h2 class="card-title mt-3 mb-3 title-main fw-bold">${mainNews.title}</h2>
-            <p class="card-text content-main" id="mc"></p>
+            <p class="card-text content-main" id="main-content"></p>
           </div>
         </div>
       </div>
@@ -39,22 +46,26 @@ $(document).ready(() => {
       </div>
     `);
 
+    // Suddivide il testo in paragrafi e li aggiunge al body della main card
     const paragraphs = mainNews.content.split("\n\n");
 
     paragraphs.forEach((par) => {
       const p = $("<p>").text(par.trim());
-      $("#mc").append(p);
+      $("#main-content").append(p);
     });
   };
 
-  // Function to display the latest news
+  // Mostra le 4 notizie del giorno in 4 card separate nella sezione #latest-news
   const displayLatestNews = (data) => {
     const latestNews = $("#latest-news");
 
     for (let i = 0; i < data.length; i++) {
       const news = data[i];
+
+      // Il titolo viene troncato per evitare eccessivi overflow (e per fare clickbait)
       const titleTruncated = news.title.length > 45 ? news.title.substring(0, 45) + "..." : news.title;
 
+      // Aggiunge una card che al click apre il modale corrispondente
       latestNews.append(`
         <!-- NEWS -->
         <div class="col-lg-3 col-md-6">
@@ -68,6 +79,7 @@ $(document).ready(() => {
             </div>
           </div>
         </div>
+
         <!-- MODAL -->
         <div class="modal fade" id="notiziaModale${i}" tabindex="-1" aria-labelledby="notiziaModaleLabel${i}" aria-hidden="true">
           <div class="modal-dialog modal-dialog-scrollable">
@@ -90,12 +102,12 @@ $(document).ready(() => {
         modalBody.append(p);
       });
 
-      // Add click event handler to the news card
+      // Al click sulla card, in qualsiasi punto, apre il modale o porta al login
       $(`#notiziaCard${i}`).on("click", () => handleCardClick(i));
     }
   };
 
-  // Function to handle the AJAX request
+  // Richiede le 4 notizie "del giorno" (i.e. le ultime generate) al server
   const fetchData = () => {
     $.ajax({
       url: "/index",
@@ -107,12 +119,12 @@ $(document).ready(() => {
         displayMainNews(latestNewsData);
         displayLatestNews(latestNewsData);
       },
-      error: (jqXHR, textStatus, errorThrown) => {
+      error: (textStatus, errorThrown) => {
         console.log(`Errore durante la richiesta GET: ${textStatus} - ${errorThrown}`);
       },
     });
   };
 
-  // Call the fetchData function to retrieve and display the news data
+  // Esegue il fetch, che eseguirà le funzioni di aggiunta delle notizie al DOM
   fetchData();
 });

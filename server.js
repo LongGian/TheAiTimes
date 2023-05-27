@@ -237,7 +237,6 @@ app.post("/subscribe", async (req, res) => {
 
   try {
     if (await isUserInDB(email)) {
-      console.log("\n!!!EmailInUse!!!\n");
       return res.status(409).send("Email already used");
     }
 

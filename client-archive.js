@@ -1,32 +1,42 @@
+/*
+  Client che gestisce la pagina Archive, nella quale sono mostrate
+  tutte le notizie presenti e passate, ovvero tutte quelle presenti nel DB.
+  Come nella Home, vengono mostrate in card separate e apribili solo da utenti
+  registrati e loggati. C'è la possibilità di filtrare le notizie per categoria. 
+*/
+
 $(document).ready(() => {
-  // Function to handle the click event on the news card
+  // Gestisce il click su una news card
+  // Se l'utente è loggato mostra il modale corrispondente
+  // Se non loggato reindirizza alla registrazione/login
   const handleCardClick = (index) => {
     if (checkLoggedIn()) {
-      // User is logged in, open the modal
       $(`#notiziaModale${index}`).modal("show");
     } else {
-      // User is not logged in, redirect to subscribe.html
       window.location.href = "./subscribe.html";
     }
   };
 
-  // Function to check if the user is logged in
+  // Controlla, tramite cookie "loggedIn" se l'utente è loggato
   const checkLoggedIn = () => {
     const loggedInCookie = document.cookie
       .split(";")
       .map((cookie) => cookie.trim().split("="))
       .find((cookie) => cookie[0] === "loggedIn");
 
+    // True se "loggedIn" esiste e il suo valore è "true"
     return loggedInCookie && loggedInCookie[1] === "true";
   };
 
-  // Function to display the news based on the selected category
+  // Mostra tutte le notizie se non è selezionata una categoria
+  // Oppure mostra solo le notizie della categoria selezionata
   const displayNewsByCategory = (data, category) => {
     const newsList = $("#news-list");
     newsList.empty();
 
     for (let i = 0; i < data.length; i++) {
       if (category === "" || data[i].category === category) {
+        // Il titolo viene troncato per evitare eccessivi overflow (e per fare clickbait)
         const titleTruncated = data[i].title.length > 45 ? data[i].title.substring(0, 45) + "..." : data[i].title;
 
         const cardId = `notizia${i}`;
@@ -34,6 +44,7 @@ $(document).ready(() => {
         const modalLabelId = `notiziaModaleLabel${i}`;
         const modalBodyId = `modalBody${i}`;
 
+        // Aggiunge una card che al click apre il modale corrispondente
         newsList.append(`
           <!-- NEWS -->
           <div class="col-lg-3 col-md-6">
@@ -71,23 +82,23 @@ $(document).ready(() => {
           modalBody.append(p);
         });
 
-        // Add click event handler to the news card
+        // Al click sulla card, in qualsiasi punto, apre il modale o porta al login
         $(`#${cardId}`).on("click", () => handleCardClick(i));
       }
     }
   };
 
-  // Function to handle the AJAX request
+  // Richiede tutte le notizie al server
   const fetchData = () => {
     $.ajax({
       url: "/archive",
       type: "GET",
       dataType: "json",
       success: (data) => {
-        // Display all news initially
+        // Inizialmente vengono mostrate tutte le notizie
         displayNewsByCategory(data, "");
 
-        // Handle category filter change event
+        // Alla selezione di una categoria si mostrano solo le notizie corrispondenti 
         $("#category-select").change(function () {
           const selectedCategory = $(this).val();
           displayNewsByCategory(data, selectedCategory);
@@ -99,6 +110,6 @@ $(document).ready(() => {
     });
   };
 
-  // Call the fetchData function to retrieve and display the news data
+  // Esegue il fetch, che eseguirà le funzioni di aggiunta delle notizie al DOM
   fetchData();
 });
