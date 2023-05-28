@@ -45,23 +45,27 @@ $(document).ready(() => {
       data.forEach((news) => {
         const titleTruncated = news.title;
 
+        // Aggiunge titolo della notizia e il select per scegliere il voto
+        // Ogni select ha lo stesso unique_id della notizia ("unique_id" è attributo nella tabella "news" del DB)
         newsToVote.append(`
           <div class="row list-group-item d-flex">
             <div class="col-11 text-start">${titleTruncated}</div>
             <div class="col-1">
-            <select name="newsVote" class="" id="newsVote${news.unique_id}">
-            <option value=""></option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
+              <select name="newsVote" class="" id="newsVote${news.unique_id}">
+                <option value=""></option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
             </div>
           </div>
         `);
       });
 
+      // Se l'utente è loggato il button gestisce il voto
+      // Se non è loggato reindirizza a subscribe/login
       if (loggedIn) {
         $("#button-footer").append(`
           <button id="confirmVoteBtn" class="btn btn-primary">Confirm & Vote</button>
@@ -72,6 +76,7 @@ $(document).ready(() => {
         `);
       }
 
+      // Se viene premuto il button che gestisce il voto viene creato array dei voti
       $("#confirmVoteBtn").click(() => {
         const selectedOptions = $("select[name=newsVote]")
           .map(function () {
@@ -89,10 +94,7 @@ $(document).ready(() => {
           return;
         }
 
-        // Check if user has already voted for today's news
-        const currentDate = new Date();
-        const today = currentDate.toISOString().split("T")[0]; // Get today's date in "yyyy-mm-dd" format
-
+        // Controlla se l'utente ha già votato per le ultime notizie
         $.ajax({
           url: "/checkvote",
           type: "POST",
@@ -100,6 +102,7 @@ $(document).ready(() => {
           contentType: "application/json",
           success: (response) => {
             if (response.hasVotedToday) {
+              // Ha già votato, avvisa con alert
               const alertMessage = $("<div class='alert alert-warning my-1'>You have already voted for today's news. Please wait for new news to vote again.</div>");
               $("#voting-form").after(alertMessage);
 
@@ -107,7 +110,7 @@ $(document).ready(() => {
                 alertMessage.remove();
               }, 3000);
             } else {
-              // User can submit the votes
+              // Non ha votato, crea array dei voti che oltre al valore contiene id della notizia ed email del votante.
               const votes = [];
 
               $("select[name=newsVote]").each(function () {
@@ -124,12 +127,14 @@ $(document).ready(() => {
                 }
               });
 
+              // Invia i voti al server che gestisce l'aggiornamento dello score
               $.ajax({
                 url: "/submitvotes",
                 type: "POST",
                 data: JSON.stringify(votes),
                 contentType: "application/json",
                 success: (response) => {
+                  // Conferma l'avvenuta votazione
                   const alertMessage = $("<div class='alert alert-success my-1'>Votes submitted successfully! Stay tuned for new news.</div>");
                   $("#voting-form").after(alertMessage);
 
@@ -138,37 +143,54 @@ $(document).ready(() => {
                   }, 3000);
                 },
                 error: (jqXHR, textStatus, errorThrown) => {
+                  // Avvisa di un errore
                   console.error("Error submitting votes:", textStatus, errorThrown);
-                  alert("Error submitting votes. Please try again later.");
+                  const alertMessage = $("<div class='alert alert-danger my-1'>An error occured, please retry later.</div>");
+                  $("#voting-form").after(alertMessage);
+
+                  setTimeout(() => {
+                    alertMessage.remove();
+                  }, 3000);
                 },
               });
             }
           },
           error: (jqXHR, textStatus, errorThrown) => {
-            console.error("Error checking vote status:", textStatus, errorThrown);
-            alert("Error checking vote status. Please try again later.");
+            // Avvisa di un errore
+            const alertMessage = $("<div class='alert alert-danger my-1'>An error occured, please retry later.</div>");
+            $("#voting-form").after(alertMessage);
+
+            setTimeout(() => {
+              alertMessage.remove();
+            }, 3000);
           },
         });
       });
     },
     error: (jqXHR, textStatus, errorThrown) => {
-      console.error(`Error requesting top news: ${textStatus} - ${errorThrown}`);
+      // Avvisa di un errore
+      const alertMessage = $("<div class='alert alert-danger my-1'>An error occured, please retry later.</div>");
+      $("#voting-form").after(alertMessage);
+
+      setTimeout(() => {
+        alertMessage.remove();
+      }, 3000);
     },
   });
 
-  //
-  // TOP 5 RANKING
-  //
+  // Richiede al server le top 5 notizie per score
   $.ajax({
     url: "/gettopnews",
     type: "GET",
     dataType: "json",
     success: (data) => {
+      // Aggiunge alla card #top-news-card le 5 notizie in ordine di score
       const topNewsCard = $("#top-news-card");
 
       data.forEach((news) => {
         const titleTruncated = news.title;
 
+        // Aggiunge titolo della notizia e un badge con il punteggio
         topNewsCard.append(`
           <div class="row list-group-item d-flex">
             <div class="col-11 text-start">${titleTruncated}</div>
@@ -179,39 +201,13 @@ $(document).ready(() => {
     },
     error: (jqXHR, textStatus, errorThrown) => {
       console.log(`Errore durante la richiesta GET: ${textStatus} - ${errorThrown}`);
+      // Avvisa di un errore
+      const alertMessage = $("<div class='alert alert-danger my-1'>An error occured, please retry later.</div>");
+      $("#voting-form").after(alertMessage);
+
+      setTimeout(() => {
+        alertMessage.remove();
+      }, 3000);
     },
-  });
-
-  //
-  // VOTING FORM HANDLING
-  //
-  $("#voting-form").submit((event) => {
-    event.preventDefault();
-
-    const votes = [];
-
-    data.forEach((news, i) => {
-      const voteValue = $(`#newsVote${i}`).val();
-      if (voteValue) {
-        const vote = {
-          title: news.title,
-          score: parseInt(voteValue),
-        };
-        votes.push(vote);
-      }
-    });
-
-    $.ajax({
-      url: "/submitvotes",
-      type: "POST",
-      data: JSON.stringify(votes),
-      contentType: "application/json",
-      success: (response) => {
-        console.log("Voti inviati con successo:", response);
-      },
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.error("Errore durante la richiesta POST:", textStatus, errorThrown);
-      },
-    });
   });
 });
