@@ -37,7 +37,7 @@ $(document).ready(() => {
     for (let i = 0; i < data.length; i++) {
       if (category === "" || data[i].category === category) {
         // Il titolo viene troncato per evitare eccessivi overflow (e per fare clickbait)
-        const titleTruncated = data[i].title.length > 45 ? data[i].title.substring(0, 45) + "..." : data[i].title;
+        const titleTruncated = data[i].title;
 
         const cardId = `notizia${i}`;
         const modalId = `notiziaModale${i}`;
@@ -46,30 +46,32 @@ $(document).ready(() => {
 
         // Aggiunge una card che al click apre il modale corrispondente
         newsList.append(`
-          <!-- NEWS -->
-          <div class="col-lg-3 col-md-6">
-            <div class="card mb-4" id="${cardId}">
-              <div class="position-relative">
-                <img src="${data[i].imageurl}" class="card-img" alt="Immagine della notizia" />
-                <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3">${data[i].category}</span>
-              </div>
-              <div class="card-body">
-                <h5 class="card-title fw-bold">${titleTruncated}</h5>
-              </div>
+        <!-- NEWS -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card mb-4 shadow-lg" id="${cardId}">
+            <div class="position-relative">
+              <img src="${data[i].imageurl}" class="card-img-top" alt="Immagine della notizia" />
+              <span class="badge bg-primary text-white position-absolute top-0 start-0 m-3">${data[i].category}</span>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title fw-bold">${titleTruncated}</h5>
             </div>
           </div>
-          <!-- MODAL -->
-          <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalLabelId}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title fw-bold" id="${modalLabelId}">${data[i].title}</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-                </div>
-                <div class="modal-body" id="${modalBodyId}"></div>
+        </div>
+        
+        <!-- MODAL -->
+        <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalLabelId}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="${modalLabelId}">${data[i].title}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
               </div>
+              <div class="modal-body" id="${modalBodyId}"></div>
             </div>
           </div>
+        </div>
+        
         `);
 
         const content = data[i].content;

@@ -2,29 +2,37 @@
 
 $(document).ready(() => {
   let weatherData = "";
-  if (weatherData == "" && navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const data = {
-        lat: position.coords.latitude,
-        lon: position.coords.longitude,
-      };
 
-      if (weatherData == "") {
-        $.ajax({
-          url: "/weather",
-          method: "POST",
-          data: JSON.stringify(data),
-          contentType: "application/json",
-          success: function (response) {
-            weatherData += response;
-            $("#weather").html(weatherData);
-          },
-          error: function (error) {
-            console.error("Error fetching weather data:", error);
-          },
-        });
-      }
-      $("#weather").html(weatherData);
+  const updateWeather = (data) => {
+    $.ajax({
+      url: "/weather",
+      method: "POST",
+      data: JSON.stringify(data),
+      contentType: "application/json",
+      success: function (response) {
+        weatherData = response;
+        $("#weather").html(weatherData);
+      },
+      error: function (error) {
+        console.error("Error fetching weather data:", error);
+      },
     });
+  };
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const data = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        };
+        updateWeather(data);
+      },
+      (error) => {
+        console.error("Geolocation Error:", error);
+      }
+    );
+  } else {
+    console.error("Geolocation not supported by this browser.");
   }
 });

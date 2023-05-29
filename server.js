@@ -209,6 +209,7 @@ app.post("/newsGenerator", (req, res) => {
   childProcess.stderr.on("data", (data) => {
     console.log("[/newsGenerator] Error during execution:");
     console.error(i++ + ". " + data);
+    res.write(data);
   });
 
   childProcess.on("close", () => {
@@ -395,6 +396,31 @@ app.get("/gettopnews", (req, res) => {
   const sortedNews = allNews.sort((a, b) => b.score - a.score);
   const topNews = sortedNews.slice(0, 4);
   res.json(topNews);
+});
+
+app.post("/newsletter", (req, res) => {
+  const email = req.body.email;
+  console.log("newletter:", email);
+  const client = new Client(pgConfig);
+
+  client
+    .connect()
+    .then(() => {
+      const query = "INSERT INTO newsletter (email) VALUES ($1)";
+      console.log("query");
+      return client.query(query, [email]);
+    })
+    .then(() => {
+      res.json({ success: true });
+    })
+    .catch((error) => {
+      console.error("Error inserting email:", error);
+      res.status(500).json({ error: "Internal server error" });
+    })
+    .finally(() => {
+      // Chiudi la connessione al database
+      client.end();
+    });
 });
 
 app.post("/weather", async (req, res) => {

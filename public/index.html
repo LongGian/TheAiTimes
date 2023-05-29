@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
@@ -20,25 +21,10 @@
       <!-- MAIN NEWS -->
       <div class="row" id="main-news"></div>
       <!-- LATEST NEWS -->
-      <div class="d-md-block d-none display-6 mb-3">Today's News</div>
-      <div class="d-md-none display-6 mb-3 m-auto text-center">Today's News</div>
+      <div class="display-6 mb-4 mt-2 text-center">Today's News</div>
+
       <div class="row" id="latest-news"></div>
 
-      <!-- NEWSLETTER -->
-      <div class="row mb-3">
-        <div class="col">
-          <div class="display-6">Subscribe to our newsletter!</div>
-          <div>Stay informed and never miss a beat with our latest news and updates</div>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="mb-3 col-lg-6">
-          <div class="input-group">
-            <input type="email" class="form-control" id="newsletterEmail" placeholder="Type your email" />
-            <button type="submit" class="btn btn-primary">Iscriviti</button>
-          </div>
-        </div>
-      </div>
     </main>
 
     <!-- FOOTER -->
@@ -47,14 +33,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
     <script src="../weather.js"></script>
     <script src="../client-index.js"></script>
-    <script src="../client-login.js"></script>
     <script src="../dateTime.js"></script>
     <script>
       $("#header").load("./header.html");
       $("#footer").load("./footer.html");
-
       $(document).ready(function () {
-        $("#navHome").addClass("active");
+        setTimeout(function () {
+          $("#navHome").addClass("active");
+          $("#navHome").removeClass("text-dark");
+          $("#navHome").addClass("text-white");
+        }, 100);
       });
     </script>
   </body>

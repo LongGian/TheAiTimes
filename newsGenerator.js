@@ -159,8 +159,11 @@ async function createUrl(tempUrl) {
 async function generateNewsData(category, groupId) {
   try {
     const title = await generateTitle(category);
+    await delay(2000);
     const content = await generateContent(title);
+    await delay(2000);
     const tempUrl = await generateImage(title);
+    await delay(2000);
     const imageUrl = await createUrl(tempUrl);
 
     await insertIntoDB(title, content, category, imageUrl, groupId);
@@ -169,11 +172,19 @@ async function generateNewsData(category, groupId) {
   }
 }
 
-const categories = ["politics", "economy", "science", "sport"];
+const categories = ["sport"];
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 (async () => {
   const groupId = generateGroupId();
   for (const category of categories) {
+    console.log("\n[neswGenerator.js] Generating news for category:", category);
     await generateNewsData(category, groupId);
+    await delay(2000);
   }
 })();

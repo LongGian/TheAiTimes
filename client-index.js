@@ -32,18 +32,21 @@ $(document).ready(() => {
     const mainNews = data[0];
 
     $("#main-news").append(`
-      <div class="col-lg-6 d-lg-block">
-        <div class="card mb-4" style="max-height: 400px; height: 400px">
-          <div class="card-body" style="overflow-y: scroll;">
+    <div class="col-lg-6 d-lg-block mb-4">
+    <div class="card shadow ">
+        <div class="card-body overflow-auto" style="max-height: 400px;">
             <h2 class="card-title mt-3 mb-3 title-main fw-bold">${mainNews.title}</h2>
             <p class="card-text content-main" id="main-content"></p>
-          </div>
         </div>
-      </div>
+    </div>
+</div>
 
-      <div class="col-lg-6 img-container d-none d-lg-block">
-        <img src="${mainNews.imageurl}" class="card-img img0" id="img-main" alt="" />
-      </div>
+<div class="col-lg-6 img-container d-none d-lg-block mb-4">
+    <div class="card shadow ">
+        <img src="${mainNews.imageurl}" class="card-img-top img0 rounded" id="img-main" alt="" />
+    </div>
+</div>
+
     `);
 
     // Suddivide il testo in paragrafi e li aggiunge al body della main card
@@ -63,16 +66,16 @@ $(document).ready(() => {
       const news = data[i];
 
       // Il titolo viene troncato per evitare eccessivi overflow (e per fare clickbait)
-      const titleTruncated = news.title.length > 45 ? news.title.substring(0, 45) + "..." : news.title;
+      const titleTruncated = news.title;
 
       // Aggiunge una card che al click apre il modale corrispondente
       latestNews.append(`
         <!-- NEWS -->
-        <div class="col-lg-3 col-md-6">
-          <div class="card mb-4" id="notiziaCard${i}">
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="card shadow h-100" id="notiziaCard${i}">
             <div class="position-relative">
-              <img src="${news.imageurl}" class="card-img" alt="Immagine della notizia" />
-              <span class="badge bg-white text-dark position-absolute top-0 start-0 m-3">${news.category}</span>
+              <img src="${news.imageurl}" class="card-img-top rounded" alt="Immagine della notizia" />
+              <div class="badge bg-primary text-white position-absolute top-0 start-0 m-3">${news.category}</div>
             </div>
             <div class="card-body">
               <h5 class="card-title fw-bold">${titleTruncated}</h5>
@@ -81,17 +84,21 @@ $(document).ready(() => {
         </div>
 
         <!-- MODAL -->
-        <div class="modal fade" id="notiziaModale${i}" tabindex="-1" aria-labelledby="notiziaModaleLabel${i}" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="notiziaModaleLabel">${news.title}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-              </div>
-              <div class="modal-body" id="modalBody${i}"></div>
-            </div>
-          </div>
-        </div>
+<div class="modal fade" id="notiziaModale${i}" tabindex="-1" aria-labelledby="notiziaModaleLabel${i}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold" id="notiziaModaleLabel">${news.title}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body" id="modalBody${i}"></div>
+      <div class="modal-footer">
+        <span class="info">${news.date.split("T")[0]}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
       `);
 
       const paragraphs = news.content.split("\n");
@@ -127,4 +134,35 @@ $(document).ready(() => {
 
   // Esegue il fetch, che eseguirà le funzioni di aggiunta delle notizie al DOM
   fetchData();
+
+  // Al submit della email per la newsletter
+  $("#newsletterForm").submit(function (event) {
+    event.preventDefault();
+
+    const email = $("#email").val();
+    alert(email);
+
+    $.ajax({
+      url: "/newsletter",
+      type: "POST",
+      data: JSON.stringify({ email: email }),
+      contentType: "application/json",
+      success: function (response) {
+        const alertMessage = $('<div class="alert alert-success mt-1">You are now subscribe to the newsletter!</div>');
+        unsubscribeButton.after(alertMessage);
+
+        setTimeout(() => {
+          alertMessage.remove();
+        }, 3000);
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        const alertMessage = $('<div class="alert alert-danger mt-1">An error occured, please retry later.</div>');
+        $("#subscribe-button").after(alertMessage);
+
+        setTimeout(() => {
+          alertMessage.remove();
+        }, 3000);
+      },
+    });
+  });
 });
