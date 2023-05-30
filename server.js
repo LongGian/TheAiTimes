@@ -28,7 +28,7 @@ app.use(
 
 app.use(
   session({
-    secret: "paolodicanioamogus",
+    secret: "suskeysus420",
     resave: false,
     saveUninitialized: false,
   })
@@ -187,7 +187,6 @@ app.post("/unsubscribe", async (req, res) => {
 });
 
 app.post("/newsGenerator", (req, res) => {
-  let i = 0;
   const apiKey = req.body.apiKey;
   console.log("\n[/newsGenerator] Received API key:", apiKey);
 
@@ -208,11 +207,22 @@ app.post("/newsGenerator", (req, res) => {
 
   childProcess.stderr.on("data", (data) => {
     console.log("[/newsGenerator] Error during execution:");
-    console.error(i++ + ". " + data);
+    console.error(data);
     res.write(data);
   });
 
   childProcess.on("close", () => {
+    exec("php newsletter.php", (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+    });
     res.end();
   });
 });

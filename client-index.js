@@ -134,35 +134,4 @@ $(document).ready(() => {
 
   // Esegue il fetch, che eseguirà le funzioni di aggiunta delle notizie al DOM
   fetchData();
-
-  // Al submit della email per la newsletter
-  $("#newsletterForm").submit(function (event) {
-    event.preventDefault();
-
-    const email = $("#email").val();
-    alert(email);
-
-    $.ajax({
-      url: "/newsletter",
-      type: "POST",
-      data: JSON.stringify({ email: email }),
-      contentType: "application/json",
-      success: function (response) {
-        const alertMessage = $('<div class="alert alert-success mt-1">You are now subscribe to the newsletter!</div>');
-        unsubscribeButton.after(alertMessage);
-
-        setTimeout(() => {
-          alertMessage.remove();
-        }, 3000);
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        const alertMessage = $('<div class="alert alert-danger mt-1">An error occured, please retry later.</div>');
-        $("#subscribe-button").after(alertMessage);
-
-        setTimeout(() => {
-          alertMessage.remove();
-        }, 3000);
-      },
-    });
-  });
 });

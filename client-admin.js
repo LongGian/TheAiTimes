@@ -5,7 +5,7 @@
   
   L'esecuzione dello script richiede l'inserimento di una API key valida (fornita da OpenAI).
   
-  +++ API Key per testing: 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 +++
+  +++ API Key per testing:  +++
 */
 
 $(document).ready(function () {

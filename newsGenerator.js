@@ -22,7 +22,7 @@ cloudinary.config({
 });
 
 // OpenAI API Calls
-const temperature = 1;
+const temperature = 1.1;
 const model = "text-davinci-003";
 const apiKey = process.argv[2];
 
@@ -35,6 +35,24 @@ const headers = {
   Authorization: `Bearer ${apiKey}`,
 };
 
+// POST WITH EXP BACKOFF FUNCTION
+async function axiosPostWithExponentialBackoff(url, data, options, maxRetries = 6) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await axios.post(url, data, options);
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        const delay = Math.pow(2, i) * 1000; // Exponential backoff
+        console.log(`Request exceeded rate limit. Retrying in ${delay / 1000} seconds...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        throw error; 
+      }
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 // GENERATE TITLE
 async function generateTitle(category) {
   const params = {
@@ -44,8 +62,7 @@ async function generateTitle(category) {
     max_tokens: 30,
   };
   console.log("\n[generateTitle] API Call...");
-  return await axios
-    .post(apiUrl, params, { headers: headers })
+  return await axiosPostWithExponentialBackoff(apiUrl, params, { headers: headers })
     .then((response) => {
       const title = response.data.choices[0].text.trim().replace(/["']/g, "");
       console.log("[generateTitle] Title generated!\n---> " + title);
@@ -65,8 +82,7 @@ async function generateContent(titlePrompt) {
     max_tokens: 800,
   };
   console.log("\n[generateContent] API Call...");
-  return await axios
-    .post(apiUrl, contentParams, { headers: headers })
+  return await axiosPostWithExponentialBackoff(apiUrl, contentParams, { headers: headers })
     .then((response) => {
       const content = response.data.choices[0].text.trim();
       console.log("[generateContent] Content generated!\n---> " + content);
@@ -87,8 +103,7 @@ async function generateImage(titlePrompt) {
     size: "1024x1024",
   };
   console.log("\n[generateImage] API Call...");
-  return await axios
-    .post(imageApiUrl, imageParams, { headers: headers })
+  return await axiosPostWithExponentialBackoff(imageApiUrl, imageParams, { headers: headers })
     .then((response) => {
       const url = response.data.data[0].url;
       console.log("[generateImage] Image generated!\n---> " + url);
@@ -159,11 +174,11 @@ async function createUrl(tempUrl) {
 async function generateNewsData(category, groupId) {
   try {
     const title = await generateTitle(category);
-    await delay(2000);
+    await delay(5000);
     const content = await generateContent(title);
-    await delay(2000);
+    await delay(5000);
     const tempUrl = await generateImage(title);
-    await delay(2000);
+    await delay(5000);
     const imageUrl = await createUrl(tempUrl);
 
     await insertIntoDB(title, content, category, imageUrl, groupId);
@@ -172,7 +187,7 @@ async function generateNewsData(category, groupId) {
   }
 }
 
-const categories = ["sport"];
+const categories = ["politics", "economy", "science", "sport"];
 
 function delay(ms) {
   return new Promise((resolve) => {

@@ -68,6 +68,9 @@ $(document).ready(() => {
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
               </div>
               <div class="modal-body" id="${modalBodyId}"></div>
+              <div class="modal-footer">
+                <span class="info">${data[i].date.split("T")[0]}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -100,7 +103,7 @@ $(document).ready(() => {
         // Inizialmente vengono mostrate tutte le notizie
         displayNewsByCategory(data, "");
 
-        // Alla selezione di una categoria si mostrano solo le notizie corrispondenti 
+        // Alla selezione di una categoria si mostrano solo le notizie corrispondenti
         $("#category-select").change(function () {
           const selectedCategory = $(this).val();
           displayNewsByCategory(data, selectedCategory);
