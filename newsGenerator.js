@@ -42,7 +42,7 @@ async function axiosPostWithExponentialBackoff(url, data, options, maxRetries = 
       return await axios.post(url, data, options);
     } catch (error) {
       if (error.response && error.response.status === 429) {
-        const delay = Math.pow(2, i) * 1000; // Exponential backoff
+        const delay = Math.pow(2, i) * 1000;
         console.log(`Request exceeded rate limit. Retrying in ${delay / 1000} seconds...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {

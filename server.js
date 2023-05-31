@@ -404,7 +404,7 @@ app.get("/", (req, res) => {
 
 app.get("/gettopnews", (req, res) => {
   const sortedNews = allNews.sort((a, b) => b.score - a.score);
-  const topNews = sortedNews.slice(0, 4);
+  const topNews = sortedNews.slice(0, 5);
   res.json(topNews);
 });
 
